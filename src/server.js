@@ -2,6 +2,7 @@ const http = require('node:http');
 const path = require('node:path');
 
 const { createDefaultProviders, createRegistry } = require('./registry');
+const { createRecap, renderRecapMarkdown } = require('./recap');
 const { publicDir, readStaticFile } = require('./utils/files');
 const { stripInternalSessionFields } = require('./utils/security');
 
@@ -36,6 +37,24 @@ function createServer(config) {
       });
     }
 
+    if (url.pathname === '/api/recap') {
+      const recapConfig = {
+        ...config,
+        command: 'recap',
+        days: parseDays(url.searchParams.get('days'), 7),
+        since: url.searchParams.get('since') || undefined,
+        project: url.searchParams.get('project') || undefined,
+        providers: parseProviderFilter(url.searchParams.get('provider'), config.providers),
+        format: 'markdown',
+        redact: true,
+      };
+      const recap = createRecap(recapConfig);
+      return sendJSON(res, 200, {
+        recap,
+        markdown: renderRecapMarkdown(recap),
+      });
+    }
+
     if (req.method === 'GET') {
       const file = staticPath(staticRoot, url.pathname);
       if (file) return serveStatic(res, file);
@@ -44,6 +63,17 @@ function createServer(config) {
     res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
     res.end('not found');
   });
+}
+
+function parseDays(value, fallback) {
+  if (!value) return fallback;
+  const days = Number(value);
+  return Number.isInteger(days) && days > 0 ? days : fallback;
+}
+
+function parseProviderFilter(value, fallback) {
+  if (!value || value === 'all') return fallback;
+  return String(value).split(',').map((provider) => provider.trim()).filter(Boolean);
 }
 
 function staticPath(staticRoot, pathname) {

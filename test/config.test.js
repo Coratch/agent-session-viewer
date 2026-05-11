@@ -41,3 +41,27 @@ test('parseArgs demo mode points providers at packaged examples', () => {
     assert.equal(cfg.codexDir, path.join(__dirname, '..', 'examples', 'fixtures', 'codex', 'sessions'));
   }
 });
+
+test('parseArgs accepts recap options with demo fixtures', () => {
+  const cfg = parseArgs([
+    'recap',
+    '--demo',
+    '--days', '14',
+    '--since', '2026-05-01',
+    '--project', 'agent-session-viewer',
+    '--provider', 'codex',
+    '--format', 'markdown',
+    '--out', 'recap.md',
+  ]);
+
+  assert.equal(cfg.command, 'recap');
+  assert.equal(cfg.demo, true);
+  assert.equal(cfg.days, 14);
+  assert.equal(cfg.since, '2026-05-01');
+  assert.equal(cfg.project, 'agent-session-viewer');
+  assert.deepEqual(cfg.providers, ['codex']);
+  assert.equal(cfg.format, 'markdown');
+  assert.equal(cfg.outFile, 'recap.md');
+  assert.equal(cfg.claudeDir, path.join(__dirname, '..', 'examples', 'fixtures', 'claude', 'projects'));
+  assert.equal(cfg.codexDir, path.join(__dirname, '..', 'examples', 'fixtures', 'codex', 'sessions'));
+});

@@ -76,6 +76,40 @@ body {
 
 #provider-filter { margin-bottom: 8px; }
 
+.recap-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#recap-days {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+#recap-btn,
+#copy-recap {
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 8px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#recap-btn:hover,
+#copy-recap:hover {
+  background: #1d4ed8;
+}
+
 .session-list {
   flex: 1;
   overflow: auto;
@@ -250,6 +284,44 @@ body {
 .turns {
   max-width: 1120px;
   padding: 16px 24px 80px;
+}
+
+.recap-head {
+  position: sticky;
+  top: 0;
+}
+
+.recap-actions {
+  flex-shrink: 0;
+}
+
+.recap-content {
+  max-width: 1120px;
+  padding: 16px 24px 80px;
+}
+
+.recap-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.recap-section h3 {
+  margin: 0;
+  border-bottom: 1px solid var(--border-soft);
+  background: #fafbfc;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.recap-section .recap-body {
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--mono);
+  font-size: 12.5px;
 }
 
 .turn {

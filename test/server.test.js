@@ -69,6 +69,19 @@ test('server demo mode exposes packaged Claude and Codex sessions', async (t) =>
   assert.ok(detail.turns.some((turn) => turn.kind === 'tool_call'));
 });
 
+test('server exposes local recap API for the Web UI', async (t) => {
+  const server = createServer(parseArgs(['--demo', '--port', '0']));
+  const base = await listen(server);
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const recap = await json(base, '/api/recap?days=30');
+  assert.equal(recap.recap.sessions.length, 2);
+  assert.match(recap.markdown, /# Pick Up Where I Left Off/);
+  assert.match(recap.markdown, /## Active Projects/);
+  assert.match(recap.markdown, /agent-session-viewer/);
+  assert.match(recap.markdown, /## Next Actions/);
+});
+
 function listen(server) {
   return new Promise((resolve) => {
     server.listen(0, '127.0.0.1', () => {

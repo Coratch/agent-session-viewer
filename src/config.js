@@ -6,6 +6,7 @@ const EXAMPLES_DIR = path.join(__dirname, '..', 'examples', 'fixtures');
 
 function parseArgs(argv) {
   const cfg = {
+    command: 'serve',
     host: process.env.HOST || '127.0.0.1',
     port: parsePort(process.env.PORT, 4500),
     providers: parseProviders(process.env.PROVIDER || process.env.PROVIDERS),
@@ -15,6 +16,15 @@ function parseArgs(argv) {
     codexDir: process.env.CODEX_SESSIONS_DIR ||
       path.join(os.homedir(), '.codex', 'sessions'),
   };
+
+  if (argv[0] === 'recap') {
+    cfg.command = 'recap';
+    cfg.days = 7;
+    cfg.format = 'markdown';
+    cfg.redact = true;
+    parseRecapArgs(cfg, argv.slice(1));
+    return cfg;
+  }
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -42,11 +52,54 @@ function parseArgs(argv) {
   return cfg;
 }
 
+function parseRecapArgs(cfg, argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--days') {
+      cfg.days = parsePositiveInteger(requireValue(arg, argv[++i]), arg);
+      cfg.daysExplicit = true;
+    } else if (arg === '--since') {
+      cfg.since = requireValue(arg, argv[++i]);
+    } else if (arg === '--project') {
+      cfg.project = requireValue(arg, argv[++i]);
+    } else if (arg === '--format') {
+      cfg.format = parseFormat(requireValue(arg, argv[++i]));
+    } else if (arg === '--out' || arg === '-o') {
+      cfg.outFile = requireValue(arg, argv[++i]);
+    } else if (arg === '--provider' || arg === '--providers') {
+      cfg.providers = parseProviders(requireValue(arg, argv[++i]));
+    } else if (arg === '--claude-dir') {
+      cfg.claudeDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--codex-dir') {
+      cfg.codexDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--demo') {
+      enableDemo(cfg);
+    } else if (arg === '--help' || arg === '-h') {
+      cfg.help = true;
+    } else {
+      throw new Error(`Unknown recap argument: ${arg}`);
+    }
+  }
+}
+
 function enableDemo(cfg) {
   cfg.demo = true;
   cfg.providers = [...DEFAULT_PROVIDERS];
   cfg.claudeDir = path.join(EXAMPLES_DIR, 'claude', 'projects');
   cfg.codexDir = path.join(EXAMPLES_DIR, 'codex', 'sessions');
+}
+
+function parsePositiveInteger(value, flag) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${flag} requires a positive integer`);
+  }
+  return parsed;
+}
+
+function parseFormat(value) {
+  if (value !== 'markdown') throw new Error(`Unsupported format: ${value}`);
+  return value;
 }
 
 function parseProviders(value) {

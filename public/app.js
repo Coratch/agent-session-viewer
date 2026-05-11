@@ -6,6 +6,7 @@ const state = {
   providerFilter: 'all',
   filter: '',
   active: null,
+  recapMarkdown: '',
 };
 
 function fmtTokens(n) {
@@ -136,8 +137,33 @@ async function loadSession(session) {
   renderSession(await res.json());
 }
 
+async function loadRecap() {
+  state.active = 'recap';
+  renderSessionList();
+  $('empty').hidden = true;
+  $('session-view').hidden = true;
+  $('recap-view').hidden = false;
+  $('recap-meta').textContent = 'loading...';
+  $('recap-content').innerHTML = '<div class="loading">generating recap...</div>';
+
+  const params = new URLSearchParams({
+    days: String(Math.max(1, Number($('recap-days').value) || 7)),
+    provider: state.providerFilter,
+  });
+  if (state.filter.trim()) params.set('project', state.filter.trim());
+
+  const res = await fetch('/api/recap?' + params.toString());
+  if (!res.ok) {
+    showRecapError(await res.text());
+    return;
+  }
+  const data = await res.json();
+  renderRecap(data);
+}
+
 function showLoading(session) {
   $('empty').hidden = true;
+  $('recap-view').hidden = true;
   $('session-view').hidden = false;
   $('session-title').textContent = session.title || session.id;
   $('session-meta').textContent = 'loading...';
@@ -148,6 +174,7 @@ function showLoading(session) {
 
 function showError(session, message) {
   $('empty').hidden = true;
+  $('recap-view').hidden = true;
   $('session-view').hidden = false;
   $('session-title').textContent = session.title || session.id;
   $('session-meta').textContent = 'error';
@@ -159,11 +186,21 @@ function showError(session, message) {
   $('turns').appendChild(el);
 }
 
+function showRecapError(message) {
+  $('recap-meta').textContent = 'error';
+  $('recap-content').innerHTML = '';
+  const el = document.createElement('pre');
+  el.className = 'error';
+  el.textContent = message;
+  $('recap-content').appendChild(el);
+}
+
 function renderSession(data) {
   const session = data.session;
   const summary = session.summary || {};
 
   $('empty').hidden = true;
+  $('recap-view').hidden = true;
   $('session-view').hidden = false;
   $('session-title').innerHTML = `
     <span class="provider ${escapeHtml(session.provider)}">${escapeHtml(session.provider)}</span>
@@ -189,6 +226,44 @@ function renderSession(data) {
   for (const turn of data.turns || []) {
     turns.appendChild(renderTurn(turn));
   }
+}
+
+function renderRecap(data) {
+  const recap = data.recap || {};
+  state.recapMarkdown = data.markdown || '';
+  $('recap-meta').textContent = [
+    `${(recap.sessions || []).length} sessions`,
+    `${(recap.projects || []).length} projects`,
+    `since ${fmtTime(recap.since)}`,
+  ].join(' · ');
+  $('recap-content').innerHTML = '';
+  for (const section of parseMarkdownSections(state.recapMarkdown)) {
+    const card = document.createElement('section');
+    card.className = 'recap-section';
+    const title = document.createElement('h3');
+    title.textContent = section.title;
+    const body = document.createElement('div');
+    body.className = 'recap-body';
+    body.textContent = section.body || 'No items found.';
+    card.append(title, body);
+    $('recap-content').appendChild(card);
+  }
+}
+
+function parseMarkdownSections(markdown) {
+  const sections = [];
+  const lines = String(markdown || '').split('\n');
+  let current = null;
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      if (current) sections.push(current);
+      current = { title: line.replace(/^##\s+/, ''), body: '' };
+    } else if (current) {
+      current.body += (current.body ? '\n' : '') + line;
+    }
+  }
+  if (current) sections.push(current);
+  return sections;
 }
 
 function renderContext(session) {
@@ -277,6 +352,21 @@ $('provider-filter').addEventListener('change', async (event) => {
 $('filter').addEventListener('input', (event) => {
   state.filter = event.target.value;
   renderSessionList();
+});
+
+$('recap-btn').addEventListener('click', () => {
+  loadRecap().catch((err) => showRecapError(err.stack || String(err)));
+});
+
+$('copy-recap').addEventListener('click', async () => {
+  if (!state.recapMarkdown) return;
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(state.recapMarkdown);
+    $('copy-recap').textContent = 'Copied';
+    setTimeout(() => {
+      $('copy-recap').textContent = 'Copy Markdown';
+    }, 1200);
+  }
 });
 
 init().catch((err) => {

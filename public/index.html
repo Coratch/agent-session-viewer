@@ -16,11 +16,29 @@
         <option value="all">All providers</option>
       </select>
       <input id="filter" type="search" placeholder="filter sessions..." autocomplete="off">
+      <div class="recap-controls">
+        <input id="recap-days" type="number" min="1" max="365" value="7" aria-label="recap days">
+        <button id="recap-btn" type="button">Recap</button>
+      </div>
     </header>
     <div id="session-list" class="session-list"></div>
   </aside>
   <main class="main">
     <div id="empty" class="empty">Pick a session on the left.</div>
+    <div id="recap-view" hidden>
+      <header class="session-head recap-head">
+        <div class="session-head-row">
+          <div class="session-title">
+            <h2>Pick Up Where I Left Off</h2>
+            <div id="recap-meta" class="session-meta"></div>
+          </div>
+          <div class="recap-actions">
+            <button id="copy-recap" type="button">Copy Markdown</button>
+          </div>
+        </div>
+      </header>
+      <div id="recap-content" class="recap-content"></div>
+    </div>
     <div id="session-view" hidden>
       <header class="session-head">
         <div class="session-head-row">

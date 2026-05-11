@@ -1,7 +1,7 @@
 {
   "name": "@coratch/agent-session-viewer",
-  "version": "0.1.2",
-  "description": "Local session replay and inspection viewer for Claude Code and Codex JSONL logs.",
+  "version": "0.2.1",
+  "description": "Local session replay and recap viewer for Claude Code and Codex JSONL logs.",
   "license": "MIT",
   "private": false,
   "author": "Coratch",
@@ -28,6 +28,7 @@
     "jsonl-viewer",
     "local-first",
     "observability",
+    "recap",
     "session-replay",
     "session-viewer",
     "tool-calls"
@@ -40,7 +41,7 @@
     "agent-session-viewer": "bin/agent-session-viewer.js"
   },
   "scripts": {
-    "check": "node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check public/app.js",
+    "check": "node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check src/recap.js && node --check src/redaction.js && node --check public/app.js && node scripts/scan-sensitive.js",
     "pack:check": "npm pack --dry-run",
     "start": "node src/cli.js",
     "test": "node --test"
