@@ -1,0 +1,26 @@
+{
+  "name": "agent-session-viewer",
+  "version": "0.1.0",
+  "description": "Local Web UI for browsing Claude Code and Codex session logs.",
+  "license": "MIT",
+  "private": false,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "agent-session-viewer": "./bin/agent-session-viewer.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "public/",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {}
+}
