@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">session replay workflow</title>
+  <desc id="desc">Animated workflow showing installation, local JSONL discovery, session replay, search, and export.</desc>
+  <style>
+    .bg{fill:#f8fafc}.box{fill:#fff;stroke:#d0d5dd;stroke-width:2}.text{font-family:Inter,Segoe UI,Arial,sans-serif;fill:#101828}.muted{fill:#667085}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.title{font-size:24px;font-weight:700}.small{font-size:17px}.arrow{stroke:#2563eb;stroke-width:4;fill:none;stroke-linecap:round}.pulse{fill:#2563eb;opacity:.16}.step{opacity:.45}.step1{animation:s 8s infinite}.step2{animation:s 8s infinite 1.6s}.step3{animation:s 8s infinite 3.2s}.step4{animation:s 8s infinite 4.8s}.step5{animation:s 8s infinite 6.4s}@keyframes s{0%,18%{opacity:1}24%,100%{opacity:.45}}
+  </style>
+  <rect class="bg" width="1200" height="360"/>
+  <text x="48" y="58" class="text title">From local AI logs to searchable session replay</text>
+  <g class="step step1">
+    <rect x="48" y="104" width="180" height="132" rx="16" class="box"/>
+    <circle cx="138" cy="138" r="34" class="pulse"/>
+    <text x="82" y="146" class="text mono small">npx</text>
+    <text x="78" y="186" class="text title">Start</text>
+    <text x="75" y="214" class="text muted small">one local command</text>
+  </g>
+  <path d="M238 170 H300" class="arrow"/>
+  <g class="step step2">
+    <rect x="310" y="104" width="180" height="132" rx="16" class="box"/>
+    <text x="342" y="146" class="text mono small">JSONL</text>
+    <text x="344" y="186" class="text title">Read</text>
+    <text x="338" y="214" class="text muted small">Claude + Codex</text>
+  </g>
+  <path d="M500 170 H562" class="arrow"/>
+  <g class="step step3">
+    <rect x="572" y="104" width="180" height="132" rx="16" class="box"/>
+    <text x="618" y="146" class="text mono small">TURN</text>
+    <text x="604" y="186" class="text title">Replay</text>
+    <text x="604" y="214" class="text muted small">user, assistant, tools</text>
+  </g>
+  <path d="M762 170 H824" class="arrow"/>
+  <g class="step step4">
+    <rect x="834" y="104" width="180" height="132" rx="16" class="box"/>
+    <text x="884" y="146" class="text mono small">grep</text>
+    <text x="874" y="186" class="text title">Search</text>
+    <text x="864" y="214" class="text muted small">errors and files</text>
+  </g>
+  <path d="M1024 170 H1086" class="arrow"/>
+  <g class="step step5">
+    <rect x="1096" y="104" width="56" height="132" rx="16" class="box"/>
+    <text x="1110" y="174" class="text title">MD</text>
+    <text x="1104" y="210" class="text muted small">export</text>
+  </g>
+  <text x="48" y="304" class="text muted small">No proxy. No API keys. No telemetry. Session data stays on your machine.</text>
+</svg>

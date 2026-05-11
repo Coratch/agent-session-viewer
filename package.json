@@ -1,22 +1,52 @@
 {
-  "name": "agent-session-viewer",
+  "name": "@coratch/agent-session-viewer",
   "version": "0.1.0",
-  "description": "Local Web UI for browsing Claude Code and Codex session logs.",
+  "description": "Local session replay and inspection viewer for Claude Code and Codex JSONL logs.",
   "license": "MIT",
   "private": false,
+  "author": "Coratch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Coratch/agent-session-viewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Coratch/agent-session-viewer/issues"
+  },
+  "homepage": "https://github.com/Coratch/agent-session-viewer#readme",
+  "keywords": [
+    "agent",
+    "agent-session",
+    "ai-coding",
+    "claude-code",
+    "codex",
+    "codex-cli",
+    "developer-tools",
+    "jsonl",
+    "local-first",
+    "observability",
+    "session-replay",
+    "session-viewer",
+    "tool-calls"
+  ],
   "type": "commonjs",
   "engines": {
     "node": ">=18"
   },
   "bin": {
-    "agent-session-viewer": "./bin/agent-session-viewer.js"
+    "agent-session-viewer": "bin/agent-session-viewer.js"
   },
   "scripts": {
+    "check": "node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check public/app.js",
+    "pack:check": "npm pack --dry-run",
     "start": "node src/cli.js",
     "test": "node --test"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "bin/",
+    "docs/assets/",
     "src/",
     "public/",
     "README.md",

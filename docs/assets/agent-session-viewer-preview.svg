@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">agent-session-viewer preview</title>
+  <desc id="desc">A local Web UI showing Claude Code and Codex session lists with turn-level session replay.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      .bg{fill:#eef2f7}.window{fill:#fff;filter:url(#shadow)}.bar{fill:#101828}.dot1{fill:#ef4444}.dot2{fill:#f59e0b}.dot3{fill:#22c55e}
+      .side{fill:#f8fafc}.line{stroke:#e5e7eb;stroke-width:1}.text{font-family:Inter,Segoe UI,Arial,sans-serif;fill:#111827}
+      .muted{fill:#667085}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.badge{font-size:18px;font-weight:700}
+      .small{font-size:18px}.tiny{font-size:15px}.title{font-size:28px;font-weight:700}.h2{font-size:22px;font-weight:700}
+      .card{fill:#fff;stroke:#e5e7eb;stroke-width:1}.active{fill:#e7efff;stroke:#b8cdfb}.blue{fill:#2563eb}.purple{fill:#7c3aed}.green{fill:#0f766e}
+      .pillClaude{fill:#ede9fe}.pillCodex{fill:#ccfbf1}.pillUser{fill:#d1fae5}.pillAssistant{fill:#ede9fe}.pillTool{fill:#fef3c7}.pillReason{fill:#e2e8f0}
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="760"/>
+  <rect x="44" y="38" width="1112" height="684" rx="18" class="window"/>
+  <rect x="44" y="38" width="1112" height="54" rx="18" class="bar"/>
+  <circle cx="78" cy="65" r="8" class="dot1"/><circle cx="104" cy="65" r="8" class="dot2"/><circle cx="130" cy="65" r="8" class="dot3"/>
+  <text x="164" y="72" class="text mono tiny" fill="#d0d5dd">http://127.0.0.1:4500</text>
+  <rect x="44" y="92" width="340" height="630" class="side"/>
+  <line x1="384" y1="92" x2="384" y2="722" class="line"/>
+  <text x="72" y="136" class="text title">agent-session-viewer</text>
+  <text x="72" y="166" class="text muted tiny mono">~/.claude/projects</text>
+  <text x="72" y="188" class="text muted tiny mono">~/.codex/sessions</text>
+  <rect x="72" y="214" width="284" height="42" rx="7" fill="#fff" stroke="#d0d5dd"/>
+  <text x="92" y="241" class="text muted small">All providers</text>
+  <rect x="72" y="268" width="284" height="42" rx="7" fill="#fff" stroke="#d0d5dd"/>
+  <text x="92" y="295" class="text muted small">search sessions...</text>
+  <rect x="64" y="336" width="304" height="98" rx="10" class="active"/>
+  <rect x="82" y="356" width="82" height="26" rx="13" class="pillCodex"/><text x="96" y="375" class="text badge green">CODEX</text>
+  <text x="176" y="376" class="text small" font-weight="700">build viewer</text>
+  <text x="82" y="404" class="text muted tiny mono">repo</text>
+  <text x="82" y="424" class="text muted tiny">1 turns   0 tok   -   10:00</text>
+  <rect x="64" y="448" width="304" height="98" rx="10" class="card"/>
+  <rect x="82" y="468" width="132" height="26" rx="13" class="pillClaude"/><text x="96" y="487" class="text badge purple">CLAUDE-CODE</text>
+  <text x="224" y="488" class="text small" font-weight="700">inspect repo</text>
+  <text x="82" y="516" class="text muted tiny mono">sample-project</text>
+  <text x="82" y="536" class="text muted tiny">1 turns   120 tok   $0.0006</text>
+  <text x="424" y="142" class="text title">Session replay</text>
+  <text x="424" y="174" class="text muted small mono">repo · rollout-sample · model: gpt-5.2</text>
+  <rect x="424" y="206" width="116" height="62" rx="9" class="card"/><text x="444" y="232" class="text muted tiny">Cost</text><text x="444" y="256" class="text h2 blue">-</text>
+  <rect x="552" y="206" width="116" height="62" rx="9" class="card"/><text x="572" y="232" class="text muted tiny">Turns</text><text x="572" y="256" class="text h2">1</text>
+  <rect x="680" y="206" width="116" height="62" rx="9" class="card"/><text x="700" y="232" class="text muted tiny">Input</text><text x="700" y="256" class="text h2">0</text>
+  <rect x="808" y="206" width="116" height="62" rx="9" class="card"/><text x="828" y="232" class="text muted tiny">Output</text><text x="828" y="256" class="text h2">0</text>
+  <rect x="424" y="292" width="680" height="94" rx="10" class="card"/>
+  <rect x="444" y="314" width="58" height="26" rx="13" class="pillUser"/><text x="458" y="333" class="text badge green">USER</text>
+  <text x="520" y="333" class="text muted tiny mono">10:00:02</text>
+  <text x="444" y="366" class="text small mono">build viewer</text>
+  <rect x="424" y="402" width="680" height="116" rx="10" class="card"/>
+  <rect x="444" y="424" width="104" height="26" rx="13" class="pillAssistant"/><text x="458" y="443" class="text badge purple">ASSISTANT</text>
+  <text x="566" y="443" class="text muted tiny mono">10:00:03</text>
+  <text x="444" y="476" class="text small mono">I will inspect the files.</text>
+  <rect x="424" y="534" width="680" height="94" rx="10" class="card"/>
+  <rect x="444" y="556" width="100" height="26" rx="13" class="pillReason"/><text x="458" y="575" class="text badge">REASONING</text>
+  <text x="562" y="575" class="text muted tiny mono">10:00:04</text>
+  <text x="444" y="608" class="text small mono">checked files</text>
+  <rect x="424" y="644" width="680" height="54" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+  <rect x="444" y="658" width="92" height="26" rx="13" class="pillTool"/><text x="458" y="677" class="text badge" fill="#b45309">TOOL</text>
+  <text x="554" y="677" class="text small mono">functions.exec_command {"cmd":"ls"}</text>
+</svg>
