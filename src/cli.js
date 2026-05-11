@@ -35,3 +35,7 @@ module.exports = {
   helpText,
   main,
 };
+
+if (require.main === module) {
+  main(process.argv.slice(2));
+}

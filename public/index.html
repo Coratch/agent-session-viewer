@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>agent-session-viewer</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <header class="sidebar-head">
+      <h1>agent-session-viewer</h1>
+      <div id="provider-roots" class="roots"></div>
+      <select id="provider-filter" aria-label="provider filter">
+        <option value="all">All providers</option>
+      </select>
+      <input id="filter" type="search" placeholder="filter sessions..." autocomplete="off">
+    </header>
+    <div id="session-list" class="session-list"></div>
+  </aside>
+  <main class="main">
+    <div id="empty" class="empty">Pick a session on the left.</div>
+    <div id="session-view" hidden>
+      <header class="session-head">
+        <div class="session-head-row">
+          <div class="session-title">
+            <h2 id="session-title">-</h2>
+            <div id="session-meta" class="session-meta"></div>
+          </div>
+          <div id="session-totals" class="totals"></div>
+        </div>
+        <div id="session-context" class="context-tags"></div>
+      </header>
+      <div id="turns" class="turns"></div>
+    </div>
+  </main>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

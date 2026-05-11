@@ -34,6 +34,24 @@ test('server exposes provider-neutral APIs without absolute file paths', async (
   assert.equal(bad.status, 404);
 });
 
+test('server serves static frontend assets', async (t) => {
+  const server = createServer({
+    host: '127.0.0.1',
+    port: 0,
+    providers: ['claude-code', 'codex'],
+    claudeDir: path.join(fixtureRoot, 'claude', 'projects'),
+    codexDir: path.join(fixtureRoot, 'codex', 'sessions'),
+  });
+  const base = await listen(server);
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const html = await fetch(`${base}/`).then((r) => r.text());
+  assert.match(html, /agent-session-viewer/);
+
+  const app = await fetch(`${base}/app.js`);
+  assert.equal(app.status, 200);
+});
+
 function listen(server) {
   return new Promise((resolve) => {
     server.listen(0, '127.0.0.1', () => {
