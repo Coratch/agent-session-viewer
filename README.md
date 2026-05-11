@@ -29,15 +29,6 @@ This project focuses on local session replay, turn inspection, and search. Cost 
 
 The npm package is scoped because the unscoped `agent-session-viewer` package name is already occupied by another project.
 
-Use the GitHub checkout now:
-
-```bash
-npm install -g github:Coratch/agent-session-viewer
-agent-session-viewer
-```
-
-After the npm package is published under the `@coratch` scope:
-
 ```bash
 npm install -g @coratch/agent-session-viewer
 agent-session-viewer
@@ -47,6 +38,12 @@ Try without installing globally:
 
 ```bash
 npx @coratch/agent-session-viewer@latest
+```
+
+Install from GitHub when testing unreleased changes:
+
+```bash
+npm install -g github:Coratch/agent-session-viewer
 ```
 
 ## What It Reads
