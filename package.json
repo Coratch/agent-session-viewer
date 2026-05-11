@@ -1,6 +1,6 @@
 {
   "name": "@coratch/agent-session-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local session replay and inspection viewer for Claude Code and Codex JSONL logs.",
   "license": "MIT",
   "private": false,
