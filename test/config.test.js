@@ -30,3 +30,14 @@ test('parseArgs accepts port, host, provider, and custom roots', () => {
   assert.equal(cfg.claudeDir, '/tmp/claude');
   assert.equal(cfg.codexDir, '/tmp/codex');
 });
+
+test('parseArgs demo mode points providers at packaged examples', () => {
+  for (const argv of [['--demo'], ['demo']]) {
+    const cfg = parseArgs(argv);
+
+    assert.equal(cfg.demo, true);
+    assert.deepEqual(cfg.providers, ['claude-code', 'codex']);
+    assert.equal(cfg.claudeDir, path.join(__dirname, '..', 'examples', 'fixtures', 'claude', 'projects'));
+    assert.equal(cfg.codexDir, path.join(__dirname, '..', 'examples', 'fixtures', 'codex', 'sessions'));
+  }
+});

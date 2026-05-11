@@ -13,6 +13,8 @@ It reads your local JSONL logs directly, then lets you inspect user prompts, ass
 
 ![agent-session-viewer preview](docs/assets/agent-session-viewer-preview.svg)
 
+See the [demo walkthrough](docs/demo.md) for screenshots using sanitized Claude Code and Codex fixtures.
+
 ## Why
 
 AI coding assistants leave useful local traces, but raw JSONL files are hard to read when you need to answer practical questions:
@@ -38,6 +40,12 @@ Try without installing globally:
 
 ```bash
 npx @coratch/agent-session-viewer@latest
+```
+
+Try the packaged demo without local logs:
+
+```bash
+npx @coratch/agent-session-viewer@latest --demo
 ```
 
 Install from GitHub when testing unreleased changes:
@@ -75,18 +83,21 @@ agent-session-viewer --host 127.0.0.1
 agent-session-viewer --provider claude-code,codex
 agent-session-viewer --claude-dir ~/.claude/projects
 agent-session-viewer --codex-dir ~/.codex/sessions
+agent-session-viewer --demo
 ```
 
 Binding to `0.0.0.0` can expose private prompts, tool output, repository paths, and command output. Use a trusted reverse proxy and authentication before exposing it to a network.
 
-## Positioning
+## Comparison
 
-| Tool | Best for |
-| --- | --- |
-| `ccusage` | Token and cost reports |
-| `codeburn` | Multi-tool cost dashboards |
-| `claude-code-viewer` | Claude Code Web client workflows |
-| `agent-session-viewer` | Local Claude Code and Codex session replay, turn inspection, and search |
+| Tool | Primary focus | Claude Code | Codex | Local session replay | Export focus | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `agent-session-viewer` | Local JSONL session inspection | Yes | Yes | Yes | Planned | Lightweight zero-dependency CLI for turn, reasoning, tool call, and event review |
+| `claude-code-log` | Claude Code log reading and export | Yes | No | Yes | Yes | Strong Markdown/HTML export workflow for Claude Code logs |
+| `sniffly` | Claude Code observability dashboard | Yes | No | Yes | Partial | Strong local-first privacy positioning and usage analytics |
+| `claude-code-viewer` | Claude Code Web/PWA workflows | Yes | No | Yes | Partial | Larger Claude Code-oriented viewer with project and session workflows |
+| `cxresume` | Codex resume helper | No | Yes | Partial | No | Focused on finding and resuming Codex sessions |
+| `ccusage` | Token and cost reports | Yes | No | No | Reports | Best for cost and token accounting, not conversation replay |
 
 ## Roadmap
 

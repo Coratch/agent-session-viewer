@@ -3,6 +3,7 @@ const test = require('node:test');
 const path = require('node:path');
 
 const { createServer } = require('../src/server');
+const { parseArgs } = require('../src/config');
 
 const fixtureRoot = path.join(__dirname, 'fixtures');
 
@@ -50,6 +51,22 @@ test('server serves static frontend assets', async (t) => {
 
   const app = await fetch(`${base}/app.js`);
   assert.equal(app.status, 200);
+});
+
+test('server demo mode exposes packaged Claude and Codex sessions', async (t) => {
+  const server = createServer(parseArgs(['--demo', '--port', '0']));
+  const base = await listen(server);
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const sessions = await json(base, '/api/sessions');
+  assert.equal(sessions.sessions.length, 2);
+  assert.deepEqual(sessions.sessions.map((s) => s.provider).sort(), ['claude-code', 'codex']);
+  assert.ok(sessions.sessions.some((s) => /demo/i.test(s.title)));
+
+  const codex = sessions.sessions.find((s) => s.provider === 'codex');
+  const detail = await json(base, `/api/session?provider=codex&id=${encodeURIComponent(codex.id)}`);
+  assert.ok(detail.turns.some((turn) => turn.kind === 'reasoning'));
+  assert.ok(detail.turns.some((turn) => turn.kind === 'tool_call'));
 });
 
 function listen(server) {

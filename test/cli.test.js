@@ -11,4 +11,5 @@ test('src/cli.js runs when invoked directly', () => {
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Usage: agent-session-viewer/);
+  assert.match(result.stdout, /--demo/);
 });

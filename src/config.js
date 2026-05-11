@@ -2,6 +2,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const DEFAULT_PROVIDERS = ['claude-code', 'codex'];
+const EXAMPLES_DIR = path.join(__dirname, '..', 'examples', 'fixtures');
 
 function parseArgs(argv) {
   const cfg = {
@@ -27,6 +28,8 @@ function parseArgs(argv) {
       cfg.claudeDir = requireValue(arg, argv[++i]);
     } else if (arg === '--codex-dir') {
       cfg.codexDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--demo' || arg === 'demo') {
+      enableDemo(cfg);
     } else if (/^\d+$/.test(arg)) {
       cfg.port = parsePort(arg, cfg.port);
     } else if (arg === '--help' || arg === '-h') {
@@ -37,6 +40,13 @@ function parseArgs(argv) {
   }
 
   return cfg;
+}
+
+function enableDemo(cfg) {
+  cfg.demo = true;
+  cfg.providers = [...DEFAULT_PROVIDERS];
+  cfg.claudeDir = path.join(EXAMPLES_DIR, 'claude', 'projects');
+  cfg.codexDir = path.join(EXAMPLES_DIR, 'codex', 'sessions');
 }
 
 function parseProviders(value) {
