@@ -24,7 +24,7 @@ function main(argv = process.argv.slice(2)) {
   server.listen(config.port, config.host, () => {
     const address = server.address();
     const port = typeof address === 'object' && address ? address.port : config.port;
-    process.stdout.write(`AgentLens listening on http://${config.host}:${port}\n`);
+    process.stdout.write(`RunWhy listening on http://${config.host}:${port}\n`);
   });
 }
 
@@ -36,9 +36,9 @@ function commandHelpText(command) {
 
 function helpText() {
   return [
-    'Usage: agent-session-viewer [options]',
-    '       agent-session-viewer recap [options]',
-    '       agent-session-viewer export [options]',
+    'Usage: runwhy [options]',
+    '       runwhy recap [options]',
+    '       runwhy export [options]',
     '',
     'Commands:',
     '  recap                         Generate a local work recap',
@@ -58,7 +58,7 @@ function helpText() {
 
 function recapHelpText() {
   return [
-    'Usage: agent-session-viewer recap [options]',
+    'Usage: runwhy recap [options]',
     '',
     'Options:',
     '  --days <number>                Days to include (default: 7)',
@@ -76,7 +76,7 @@ function recapHelpText() {
 
 function exportHelpText() {
   return [
-    'Usage: agent-session-viewer export [options]',
+    'Usage: runwhy export [options]',
     '',
     'Options:',
     '  --provider <id>                Session provider: claude-code or codex',

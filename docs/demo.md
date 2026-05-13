@@ -1,9 +1,9 @@
 # Demo
 
-Use demo mode when you want to try AgentLens without local Claude Code or Codex logs:
+Use demo mode when you want to try RunWhy without local Claude Code or Codex logs:
 
 ```bash
-npx @coratch/agent-session-viewer@latest --demo
+npx runwhy@latest --demo
 ```
 
 For a local checkout:
@@ -17,7 +17,7 @@ Demo mode reads sanitized fixtures from `examples/fixtures/` and opens the same 
 Generate a local recap from the same packaged fixtures:
 
 ```bash
-npx @coratch/agent-session-viewer@latest recap --demo
+npx runwhy@latest recap --demo
 ```
 
 The recap command uses local rules rather than an external LLM, so it can run without API keys or network calls beyond the package install. The Web UI also has an experimental per-session analysis flow that can use your local Claude CLI when you choose to run it.
@@ -25,7 +25,7 @@ The recap command uses local rules rather than an external LLM, so it can run wi
 Export one sanitized demo session as Markdown:
 
 ```bash
-npx @coratch/agent-session-viewer@latest export --demo --provider codex --id rollout-demo --redaction strict --out session.md
+npx runwhy@latest export --demo --provider codex --id rollout-demo --redaction strict --out session.md
 ```
 
 The export command is useful when a teammate or issue needs turn-level evidence rather than a high-level recap.
@@ -37,7 +37,7 @@ The export command is useful when a teammate or issue needs turn-level evidence 
 Found 2 sessions across 2 active projects from claude-code, codex.
 
 ## Active Projects
-- agent-session-viewer
+- runwhy
 - demo-app
 
 ## Completed

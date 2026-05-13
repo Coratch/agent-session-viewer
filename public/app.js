@@ -540,7 +540,8 @@ function sessionKey(session) {
 
 function restoreLayoutState() {
   try {
-    const raw = localStorage.getItem('agent-session-viewer:layout:v1');
+    const raw = localStorage.getItem('runwhy:layout:v1')
+      || localStorage.getItem('agent-session-viewer:layout:v1');
     if (raw) {
       const layout = JSON.parse(raw);
       state.sidebarCollapsed = Boolean(layout.sidebarCollapsed);
@@ -552,7 +553,7 @@ function restoreLayoutState() {
 
 function saveLayoutState() {
   try {
-    localStorage.setItem('agent-session-viewer:layout:v1', JSON.stringify({
+    localStorage.setItem('runwhy:layout:v1', JSON.stringify({
       sidebarCollapsed: state.sidebarCollapsed,
       detailCollapsed: state.detailCollapsed,
     }));
@@ -707,7 +708,7 @@ function selectedAnalysisLlm() {
 function analysisCacheKey(session = state.activeSession, templateId = selectedAnalysisTemplate()) {
   if (!session?.provider || !session?.id || !templateId) return '';
   return [
-    'agent-session-viewer',
+    'runwhy',
     'analysis',
     'v1',
     encodeURIComponent(session.provider),

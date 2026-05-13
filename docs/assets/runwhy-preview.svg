@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
-  <title id="title">agent-session-viewer preview</title>
+  <title id="title">RunWhy preview</title>
   <desc id="desc">A local Web UI showing Claude Code and Codex session lists with turn-level session replay.</desc>
   <defs>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -21,7 +21,7 @@
   <text x="164" y="72" class="text mono tiny" fill="#d0d5dd">http://127.0.0.1:4500</text>
   <rect x="44" y="92" width="340" height="630" class="side"/>
   <line x1="384" y1="92" x2="384" y2="722" class="line"/>
-  <text x="72" y="136" class="text title">agent-session-viewer</text>
+  <text x="72" y="136" class="text title">RunWhy</text>
   <text x="72" y="166" class="text muted tiny mono">~/.claude/projects</text>
   <text x="72" y="188" class="text muted tiny mono">~/.codex/sessions</text>
   <rect x="72" y="214" width="284" height="42" rx="7" fill="#fff" stroke="#d0d5dd"/>
@@ -30,16 +30,16 @@
   <text x="92" y="295" class="text muted small">search sessions...</text>
   <rect x="64" y="336" width="304" height="98" rx="10" class="active"/>
   <rect x="82" y="356" width="82" height="26" rx="13" class="pillCodex"/><text x="96" y="375" class="text badge green">CODEX</text>
-  <text x="176" y="376" class="text small" font-weight="700">build viewer</text>
+  <text x="176" y="376" class="text small" font-weight="700">diagnose run</text>
   <text x="82" y="404" class="text muted tiny mono">repo</text>
   <text x="82" y="424" class="text muted tiny">1 turns   0 tok   -   10:00</text>
   <rect x="64" y="448" width="304" height="98" rx="10" class="card"/>
   <rect x="82" y="468" width="132" height="26" rx="13" class="pillClaude"/><text x="96" y="487" class="text badge purple">CLAUDE-CODE</text>
-  <text x="224" y="488" class="text small" font-weight="700">inspect repo</text>
+  <text x="224" y="488" class="text small" font-weight="700">inspect timeout</text>
   <text x="82" y="516" class="text muted tiny mono">sample-project</text>
   <text x="82" y="536" class="text muted tiny">1 turns   120 tok   $0.0006</text>
-  <text x="424" y="142" class="text title">Session replay</text>
-  <text x="424" y="174" class="text muted small mono">repo · rollout-sample · model: gpt-5.2</text>
+  <text x="424" y="142" class="text title">Run replay</text>
+  <text x="424" y="174" class="text muted small mono">RunWhy · rollout-sample · model: gpt-5.2</text>
   <rect x="424" y="206" width="116" height="62" rx="9" class="card"/><text x="444" y="232" class="text muted tiny">Cost</text><text x="444" y="256" class="text h2 blue">-</text>
   <rect x="552" y="206" width="116" height="62" rx="9" class="card"/><text x="572" y="232" class="text muted tiny">Turns</text><text x="572" y="256" class="text h2">1</text>
   <rect x="680" y="206" width="116" height="62" rx="9" class="card"/><text x="700" y="232" class="text muted tiny">Input</text><text x="700" y="256" class="text h2">0</text>
@@ -47,7 +47,7 @@
   <rect x="424" y="292" width="680" height="94" rx="10" class="card"/>
   <rect x="444" y="314" width="58" height="26" rx="13" class="pillUser"/><text x="458" y="333" class="text badge green">USER</text>
   <text x="520" y="333" class="text muted tiny mono">10:00:02</text>
-  <text x="444" y="366" class="text small mono">build viewer</text>
+  <text x="444" y="366" class="text small mono">diagnose run</text>
   <rect x="424" y="402" width="680" height="116" rx="10" class="card"/>
   <rect x="444" y="424" width="104" height="26" rx="13" class="pillAssistant"/><text x="458" y="443" class="text badge purple">ASSISTANT</text>
   <text x="566" y="443" class="text muted tiny mono">10:00:03</text>

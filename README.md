@@ -1,21 +1,21 @@
-# AgentLens
+# RunWhy
 
-Local AI coding agent observability, replay, recap, and time diagnosis for Claude Code and Codex.
+Local flight recorder, replay, recap, and time diagnosis for AI coding agents.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-339933)
 ![Local first](https://img.shields.io/badge/privacy-local--first-0f766e)
 ![No telemetry](https://img.shields.io/badge/telemetry-none-475569)
 
-`ccusage` tells you how much you spent. AgentLens shows what actually happened, why an agent run took time, and where to restart.
+`ccusage` tells you how much you spent. RunWhy tells you why an agent run slowed down, where it got stuck, and which turn proves it.
 
-AgentLens reads your local JSONL logs directly, then lets you inspect user prompts, assistant replies, reasoning summaries, tool calls, tool results, events, and attachments in one local Web UI. The `recap` command generates a local Markdown work summary from recent Claude Code and Codex sessions without calling an external LLM. The Web UI can also run an optional single-session LLM diagnosis through your local Claude CLI.
+RunWhy reads local Claude Code and Codex JSONL logs directly, then turns them into a local Web UI for replay, recap, and evidence-backed time diagnosis. The `recap` command generates a local Markdown work summary without calling an external LLM. The Web UI can also run an optional single-session diagnosis through your local Claude CLI.
 
-![AgentLens preview](docs/assets/agent-session-viewer-preview.svg)
+![RunWhy preview](docs/assets/runwhy-preview.svg)
 
-See the [demo walkthrough](docs/demo.md) for screenshots using sanitized Claude Code and Codex fixtures. See the [issue and PR recap example](docs/issue-pr-recap-example.md) for a shareable workflow.
+Open the [RunWhy site](https://coratch.github.io/agent-session-viewer/) for a product overview and static example. See the [demo walkthrough](docs/demo.md) for screenshots using sanitized Claude Code and Codex fixtures. See the [issue and PR recap example](docs/issue-pr-recap-example.md) for a shareable workflow.
 
-## Why
+## Why RunWhy
 
 AI coding assistants leave useful local traces, but raw JSONL files are hard to read when you need to answer practical questions:
 
@@ -26,33 +26,33 @@ AI coding assistants leave useful local traces, but raw JSONL files are hard to 
 - What did I work on before the weekend, and where should I restart?
 - What should I export into a bug report, PR, or postmortem?
 
-This project focuses on local session replay, turn inspection, recap, and time diagnosis. Cost and token numbers are useful context, but they are not the primary product.
+This project focuses on local session replay, turn inspection, recap, and time diagnosis. Cost and token numbers are useful context, but they are not the primary product. The core question is simple: why did this run take so long?
 
 ## Install
 
-The product name is AgentLens. The npm package remains `@coratch/agent-session-viewer` for install and CLI compatibility; the unscoped `agent-session-viewer` package name is already occupied by another project.
+The primary npm package is `runwhy`. The old `agent-session-viewer` CLI remains as a compatibility alias inside the package.
 
 ```bash
-npm install -g @coratch/agent-session-viewer
-agent-session-viewer
+npm install -g runwhy
+runwhy
 ```
 
 Try without installing globally:
 
 ```bash
-npx @coratch/agent-session-viewer@latest
+npx runwhy@latest
 ```
 
 Try the packaged Web UI demo without local logs:
 
 ```bash
-npx @coratch/agent-session-viewer@latest --demo
+npx runwhy@latest --demo
 ```
 
 Try the packaged recap demo:
 
 ```bash
-npx @coratch/agent-session-viewer@latest recap --demo
+npx runwhy@latest recap --demo
 ```
 
 Install from GitHub when testing unreleased changes:
@@ -79,7 +79,7 @@ The server binds to `127.0.0.1:4500` by default. It does not proxy model traffic
 - Generate a local Markdown recap of recent work with default redaction
 - Analyze one session for time cost, delay segments, root causes, confidence, and evidence turns
 - Save analysis reports locally and copy them as Markdown
-- Use an AgentLens layout with top-level source refresh, session navigation, diagnosis workspace, and right-side inspector
+- Use a RunWhy layout with top-level source refresh, session navigation, diagnosis workspace, and right-side inspector
 - Keep private logs local by default
 - Run as a zero-dependency Node.js CLI
 
@@ -88,26 +88,26 @@ The server binds to `127.0.0.1:4500` by default. It does not proxy model traffic
 ## CLI
 
 ```bash
-agent-session-viewer
-agent-session-viewer --port 5000
-agent-session-viewer --host 127.0.0.1
-agent-session-viewer --provider claude-code,codex
-agent-session-viewer --claude-dir ~/.claude/projects
-agent-session-viewer --codex-dir ~/.codex/sessions
-agent-session-viewer --demo
+runwhy
+runwhy --port 5000
+runwhy --host 127.0.0.1
+runwhy --provider claude-code,codex
+runwhy --claude-dir ~/.claude/projects
+runwhy --codex-dir ~/.codex/sessions
+runwhy --demo
 ```
 
 Generate a local work recap:
 
 ```bash
-agent-session-viewer recap
-agent-session-viewer recap --days 7
-agent-session-viewer recap --since 2026-05-01
-agent-session-viewer recap --project agent-session-viewer
-agent-session-viewer recap --provider claude-code,codex
-agent-session-viewer recap --redaction strict
-agent-session-viewer recap --out recap.md
-agent-session-viewer recap --demo
+runwhy recap
+runwhy recap --days 7
+runwhy recap --since 2026-05-01
+runwhy recap --project runwhy
+runwhy recap --provider claude-code,codex
+runwhy recap --redaction strict
+runwhy recap --out recap.md
+runwhy recap --demo
 ```
 
 Recap output is generated with local rules, not an external LLM. It includes active projects, completed items, open threads, commands/files, key decisions, and next actions. Basic redaction is enabled by default for home paths and common token/header shapes.
@@ -115,8 +115,8 @@ Recap output is generated with local rules, not an external LLM. It includes act
 Export one session as Markdown:
 
 ```bash
-agent-session-viewer export --provider codex --id rollout-demo --format markdown --out session.md
-agent-session-viewer export --provider claude-code --id session-claude-demo --redaction strict --demo
+runwhy export --provider codex --id rollout-demo --format markdown --out session.md
+runwhy export --provider claude-code --id session-claude-demo --redaction strict --demo
 ```
 
 Use `--redaction strict` before sharing recap or export output in an issue, PR, or postmortem. Strict mode also hides broader identifiers such as emails, IP addresses, absolute paths, cloud key shapes, and username-like values. Use `--redaction none` only for private local inspection.
@@ -135,7 +135,7 @@ This feature requires a working local Claude CLI. It does not require storing AP
 
 | Tool | Primary focus | Claude Code | Codex | Local session replay | Export focus | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| AgentLens (`@coratch/agent-session-viewer`) | Local agent observability, replay, recap, and time diagnosis | Yes | Yes | Yes | Recap, diagnosis, and Markdown export | Lightweight zero-dependency CLI plus optional local Claude CLI diagnosis |
+| RunWhy (`runwhy`) | Local flight recorder, replay, recap, and time diagnosis | Yes | Yes | Yes | Recap, diagnosis, and Markdown export | Lightweight zero-dependency CLI plus optional local Claude CLI diagnosis |
 | `claude-code-log` | Claude Code log reading and export | Yes | No | Yes | Yes | Strong Markdown/HTML export workflow for Claude Code logs |
 | `sniffly` | Claude Code observability dashboard | Yes | No | Yes | Partial | Strong local-first privacy positioning and usage analytics |
 | `claude-code-viewer` | Claude Code Web/PWA workflows | Yes | No | Yes | Partial | Larger Claude Code-oriented viewer with project and session workflows |

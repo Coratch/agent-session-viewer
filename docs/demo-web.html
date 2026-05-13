@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RunWhy Example Web</title>
+  <meta name="description" content="A static example of the RunWhy agent session replay and time diagnosis interface.">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="top">
+    <nav class="nav">
+      <a class="brand" href="./" aria-label="RunWhy home">
+        <span class="mark">RW</span>
+        <span>RunWhy</span>
+      </a>
+      <div class="nav-links">
+        <a href="./">Home</a>
+        <a href="demo.md">Docs</a>
+        <a href="https://github.com/Coratch/agent-session-viewer">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="eyebrow">Static example</div>
+      <h2>Agent run diagnosis in one view</h2>
+      <p style="max-width:720px;color:var(--muted);margin-top:-8px">This page is a static preview for GitHub Pages. The real app runs locally with <code>npx runwhy@latest --demo</code> and reads your local Claude Code and Codex logs.</p>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="demo-shell">
+        <aside class="demo-side">
+          <div class="demo-label">Sessions</div>
+          <div class="session-card">
+            <span class="pill">Codex</span>
+            <strong>Demo: export session evidence</strong>
+            <p>1 turn - analyzed - long run</p>
+          </div>
+          <div class="session-card">
+            <span class="pill">Claude Code</span>
+            <strong>Demo: inspect checkout timeout</strong>
+            <p>2 turns - completed</p>
+          </div>
+        </aside>
+
+        <section class="demo-main">
+          <div class="demo-label">Replay</div>
+          <div class="turn-card">
+            <span class="pill">User</span>
+            <strong>Export the evidence from this agent session.</strong>
+            <p>The user asks for a shareable handoff with strict redaction.</p>
+          </div>
+          <div class="turn-card">
+            <span class="pill">Tool Call</span>
+            <strong>npm test</strong>
+            <p>The run waits on local test execution and produces a long command output.</p>
+          </div>
+          <div class="turn-card">
+            <span class="pill">Assistant</span>
+            <strong>Summary and next action</strong>
+            <p>The final answer claims the export is ready. RunWhy links that claim back to the command evidence.</p>
+          </div>
+        </section>
+
+        <aside class="demo-rail">
+          <div class="demo-label">Diagnosis</div>
+          <div class="metric">
+            <strong>Primary cause</strong>
+            <p>Tool execution dominated this run.</p>
+          </div>
+          <div class="metric">
+            <strong>Duration</strong>
+            <p>Total 12.0s - Active 10.4s - Idle 1.6s</p>
+          </div>
+          <div class="metric">
+            <strong>Delay timeline</strong>
+            <div class="timeline">
+              <div class="bar"><span>tool</span><span class="track"><span class="fill" style="width:76%"></span></span><span>9.1s</span></div>
+              <div class="bar"><span>reason</span><span class="track"><span class="fill blue" style="width:36%"></span></span><span>2.3s</span></div>
+              <div class="bar"><span>idle</span><span class="track"><span class="fill amber" style="width:20%"></span></span><span>1.6s</span></div>
+            </div>
+          </div>
+          <div class="metric">
+            <strong>Evidence jumps</strong>
+            <p>turn 2: command start<br>turn 3: command result<br>turn 4: final claim</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Install the real local app with <code>npm install -g runwhy</code>.
+  </footer>
+</body>
+</html>

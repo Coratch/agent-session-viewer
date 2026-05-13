@@ -5,19 +5,19 @@ This example shows how to share an agent session recap without pasting raw local
 ## Generate a Shareable Recap
 
 ```bash
-agent-session-viewer recap --days 7 --project agent-session-viewer --redaction strict --out recap.md
+runwhy recap --days 7 --project runwhy --redaction strict --out recap.md
 ```
 
 For a public demo that does not require local logs:
 
 ```bash
-npx @coratch/agent-session-viewer@latest recap --demo --redaction strict
+npx runwhy@latest recap --demo --redaction strict
 ```
 
 ## Export One Evidence Session
 
 ```bash
-agent-session-viewer export --provider codex --id rollout-demo --format markdown --redaction strict --out session.md
+runwhy export --provider codex --id rollout-demo --format markdown --redaction strict --out session.md
 ```
 
 Use `--redaction strict` before sharing outside your machine. Strict redaction hides broader identifiers such as emails, IP addresses, absolute paths, cloud key shapes, and username-like values.

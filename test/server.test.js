@@ -65,7 +65,7 @@ test('server serves static frontend assets', async (t) => {
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const html = await fetch(`${base}/`).then((r) => r.text());
-  assert.match(html, /AgentLens/);
+  assert.match(html, /RunWhy/);
   assert.match(html, /No session selected/);
   assert.match(html, /workspace-switcher/);
   assert.match(html, /nav-action/);

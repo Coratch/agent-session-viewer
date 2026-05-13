@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RunWhy - Local flight recorder for AI coding agents</title>
+  <meta name="description" content="RunWhy is a local flight recorder for Claude Code and Codex. Replay sessions, recap work, and diagnose why agent runs slowed down.">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header class="top">
+    <nav class="nav">
+      <a class="brand" href="./" aria-label="RunWhy home">
+        <span class="mark">RW</span>
+        <span>RunWhy</span>
+      </a>
+      <div class="nav-links">
+        <a href="demo-web.html">Example Web</a>
+        <a href="demo.md">Docs</a>
+        <a href="https://github.com/Coratch/agent-session-viewer">GitHub</a>
+        <a href="https://www.npmjs.com/package/runwhy">npm</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Local flight recorder for AI coding agents</div>
+        <h1>RunWhy</h1>
+        <p>Stop reading raw JSONL. RunWhy shows what your coding agent did, why the run took time, where it got stuck, and which original turn proves it.</p>
+        <div class="actions">
+          <a class="button primary" href="demo-web.html">Open static example</a>
+          <a class="button" href="https://github.com/Coratch/agent-session-viewer">View GitHub</a>
+          <a class="button" href="https://www.npmjs.com/package/runwhy">Install from npm</a>
+        </div>
+        <div class="command">npx runwhy@latest --demo</div>
+      </div>
+      <figure class="product-shot">
+        <img src="assets/demo-session-list.png" alt="RunWhy session list preview">
+      </figure>
+    </section>
+
+    <section class="section">
+      <h2>Core Promise</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Why did this run take so long?</h3>
+          <p>RunWhy turns local agent logs into duration metrics, delay segments, and root-cause hypotheses.</p>
+        </article>
+        <article class="card">
+          <h3>Evidence, not hand-waving</h3>
+          <p>Every useful diagnosis can jump back to the original turn so you can verify the model's claim.</p>
+        </article>
+        <article class="card">
+          <h3>Local by default</h3>
+          <p>Read Claude Code and Codex logs directly from your machine. No telemetry, no hosted collector, no required API key.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What RunWhy Does</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Replay</h3>
+          <p>Inspect prompts, assistant messages, reasoning summaries, tool calls, tool results, events, and attachments.</p>
+        </article>
+        <article class="card">
+          <h3>Recap</h3>
+          <p>Generate a local Markdown handoff for recent Claude Code and Codex work, with redaction before sharing.</p>
+        </article>
+        <article class="card">
+          <h3>Diagnose</h3>
+          <p>Use local metrics and optional Claude CLI analysis to explain slow runs and stalled turns.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Positioning</h2>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Tool Type</th>
+            <th>Typical Question</th>
+            <th>RunWhy Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cost tools</td>
+            <td>How much did I spend?</td>
+            <td>RunWhy asks why the run took time and where work stalled.</td>
+          </tr>
+          <tr>
+            <td>Generic LLM observability</td>
+            <td>How is my production app tracing?</td>
+            <td>RunWhy is built for local coding agents and their JSONL session history.</td>
+          </tr>
+          <tr>
+            <td>Raw log viewers</td>
+            <td>What is inside this log?</td>
+            <td>RunWhy turns the session into replay, recap, diagnosis, and shareable evidence.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    RunWhy is open source, local-first, and built for Claude Code and Codex workflows.
+  </footer>
+</body>
+</html>
