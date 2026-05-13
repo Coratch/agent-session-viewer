@@ -547,6 +547,14 @@ button:disabled {
   white-space: nowrap;
 }
 
+.si-time {
+  margin-top: 5px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
 .si-meta {
   display: flex;
   gap: 8px;
@@ -556,6 +564,19 @@ button:disabled {
   color: var(--muted);
   font-family: var(--mono);
   font-size: 10.5px;
+}
+
+.session-date-group {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 8px 0 4px;
+  background: var(--sidebar);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .session-chips {
@@ -780,6 +801,36 @@ button:disabled {
   color: var(--muted);
   font-family: var(--mono);
   font-size: 11px;
+}
+
+.session-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.turn-filter-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.turn-filter-control select {
+  min-width: 150px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .refresh-controls {
@@ -1306,24 +1357,62 @@ button:disabled {
   padding: 8px 22px 72px;
 }
 
+.turns {
+  display: grid;
+  gap: 10px;
+}
+
 .turn {
-  border-bottom: 1px solid var(--line-soft);
-  padding: 10px 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.014);
+  padding: 11px 12px 13px;
+}
+
+.turn:hover {
+  border-color: #2b2e38;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .turn.evidence-active {
-  border-radius: 7px;
+  border-color: rgba(106, 168, 255, 0.34);
   background: rgba(106, 168, 255, 0.08);
   box-shadow: inset 3px 0 0 var(--blue);
-  padding-left: 10px;
+}
+
+.turn.evidence-context {
+  border-color: rgba(94, 106, 210, 0.28);
+  background: rgba(94, 106, 210, 0.055);
+}
+
+.turn.long-gap {
+  border-color: rgba(209, 154, 69, 0.24);
+  box-shadow: inset 2px 0 0 rgba(209, 154, 69, 0.72);
 }
 
 .turn-window-note {
-  border-bottom: 1px solid var(--line-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.012);
   color: var(--faint);
-  padding: 10px 0;
+  padding: 10px 12px;
   font-family: var(--mono);
   font-size: 11px;
+}
+
+.turn-date-group {
+  position: sticky;
+  top: 76px;
+  z-index: 1;
+  margin: 14px 0 4px;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(11, 12, 16, 0.9);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 0;
+  text-transform: uppercase;
 }
 
 .turn-head {
@@ -1366,6 +1455,66 @@ button:disabled {
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.012);
   padding: 1px 5px;
+}
+
+.gap-badge {
+  border: 1px solid rgba(209, 154, 69, 0.35);
+  border-radius: 5px;
+  background: rgba(209, 154, 69, 0.08);
+  color: var(--amber);
+  padding: 1px 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.turn-details {
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.014);
+  overflow: hidden;
+}
+
+.turn-details summary {
+  display: grid;
+  grid-template-columns: 14px auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 9px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.turn-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.turn-details summary::before {
+  content: '+';
+  color: var(--faint);
+  font-family: var(--mono);
+  font-weight: 800;
+}
+
+.turn-details[open] summary::before {
+  content: '-';
+}
+
+.turn-preview {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turn-details .turn-body {
+  max-height: 320px;
+  border-top: 1px solid var(--line-soft);
+  padding: 10px;
 }
 
 .turn-body {
@@ -1675,6 +1824,23 @@ button:disabled {
     justify-content: flex-start;
     flex-wrap: wrap;
     margin-top: 12px;
+  }
+
+  .session-toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .turn-filter-control {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .turn-filter-control select {
+    width: 100%;
+    min-width: 0;
   }
 
   .session-item,

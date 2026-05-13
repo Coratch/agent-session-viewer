@@ -49,6 +49,7 @@ function findSessionFile(rootDir, id) {
 }
 
 function summarizeSessionFile(entry) {
+  const lines = readJsonl(entry.file);
   const summary = emptySummary();
   let createdAt = null;
   let updatedAt = null;
@@ -57,7 +58,7 @@ function summarizeSessionFile(entry) {
   let cwd = null;
   const meta = {};
 
-  for (const line of readJsonl(entry.file)) {
+  for (const line of lines) {
     const payload = line.payload || {};
     const payloadType = payload.type;
     if (line.timestamp) {
@@ -80,12 +81,14 @@ function summarizeSessionFile(entry) {
       meta.collaborationMode = payload.collaboration_mode;
       meta.approvalPolicy = payload.approval_policy;
       meta.sandboxPolicy = payload.sandbox_policy;
+    } else if (line.type === 'response_item' && payloadType === 'message' && payload.role === 'user' && !title) {
+      const text = contentToText(payload.content);
+      if (!isInjectedContextUserMessage(text)) title = text.slice(0, 120);
     } else if (line.type === 'event_msg' && payloadType === 'user_message' && !title) {
       title = codexUserMessageText(payload).slice(0, 120);
-    } else if (isAssistantMessage(line)) {
-      summary.turns += 1;
     }
   }
+  summary.turns = countAssistantMessages(lines);
 
   return {
     id: entry.id,
@@ -104,15 +107,28 @@ function summarizeSessionFile(entry) {
 
 function readTurns(entry) {
   const turns = [];
-  for (const line of readJsonl(entry.file)) {
+  const lines = readJsonl(entry.file);
+  const canonicalMessages = canonicalMessageSignatures(lines);
+  for (const line of lines) {
     const payload = line.payload || {};
     const payloadType = payload.type;
     if (line.type === 'event_msg' && payloadType === 'user_message') {
-      turns.push(turn(entry, turns, line, 'user', 'user', codexUserMessageText(payload)));
+      const text = codexUserMessageText(payload);
+      if (!canonicalMessages.has(messageSignature('user', text))) {
+        turns.push(turn(entry, turns, line, 'user', 'user', text));
+      }
     } else if (line.type === 'event_msg' && payloadType === 'agent_message') {
-      turns.push(turn(entry, turns, line, 'assistant', 'agent', String(payload.message || '')));
+      const text = String(payload.message || '');
+      if (!canonicalMessages.has(messageSignature('assistant', text))) {
+        turns.push(turn(entry, turns, line, 'assistant', 'agent', text));
+      }
     } else if (line.type === 'response_item' && payloadType === 'message') {
-      turns.push(turn(entry, turns, line, payload.role === 'user' ? 'user' : 'assistant', payload.role || 'message', contentToText(payload.content)));
+      if (payload.role === 'user' || payload.role === 'assistant') {
+        const text = contentToText(payload.content);
+        if (!(payload.role === 'user' && isInjectedContextUserMessage(text))) {
+          turns.push(turn(entry, turns, line, payload.role, payload.role, text));
+        }
+      }
     } else if (line.type === 'response_item' && payloadType === 'reasoning') {
       const text = contentToText(payload.summary) || contentToText(payload.content);
       turns.push(turn(entry, turns, line, 'reasoning', 'reasoning', text));
@@ -127,11 +143,72 @@ function readTurns(entry) {
       turns.push(turn(entry, turns, line, 'tool_result', payload.call_id || 'tool_result', stringifyOutput(payload.output), {
         callId: payload.call_id,
       }));
-    } else if (line.type === 'event_msg' && isDisplayEvent(payloadType)) {
-      turns.push(turn(entry, turns, line, 'event', payloadType || 'event', eventText(payload)));
+    } else if (line.type === 'compacted') {
+      turns.push(turn(entry, turns, line, 'compacted', 'compacted', compactedText(payload)));
     }
   }
-  return turns;
+  return dedupeTurns(turns);
+}
+
+function canonicalMessageSignatures(lines) {
+  const signatures = new Set();
+  for (const line of lines) {
+    const payload = line.payload || {};
+    if (line.type !== 'response_item' || payload.type !== 'message') continue;
+    if (payload.role !== 'user' && payload.role !== 'assistant') continue;
+    const text = contentToText(payload.content);
+    if (payload.role === 'user' && isInjectedContextUserMessage(text)) continue;
+    signatures.add(messageSignature(payload.role, text));
+  }
+  return signatures;
+}
+
+function isInjectedContextUserMessage(text) {
+  const normalized = String(text || '').trim();
+  return normalized.startsWith('# AGENTS.md instructions for ') && normalized.includes('<INSTRUCTIONS>');
+}
+
+function messageSignature(role, text) {
+  return `${role}:${normalizeMessageText(text)}`;
+}
+
+function normalizeMessageText(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
+function dedupeTurns(turns) {
+  const seen = new Set();
+  const out = [];
+  for (const item of turns) {
+    const signature = turnSignature(item);
+    if (signature && seen.has(signature)) continue;
+    if (signature) seen.add(signature);
+    out.push(item);
+  }
+  return out.map((item, index) => ({
+    ...item,
+    id: `${item.provider === 'codex' ? item.id.split(':')[0] : item.id}:${index}`,
+  }));
+}
+
+function turnSignature(item) {
+  const text = normalizeMessageText(item.text);
+  return `${item.kind}:${item.title}:${text}`;
+}
+
+function countAssistantMessages(lines) {
+  const canonicalMessages = canonicalMessageSignatures(lines);
+  let count = 0;
+  for (const line of lines) {
+    const payload = line.payload || {};
+    if (line.type === 'response_item' && payload.type === 'message' && payload.role === 'assistant') {
+      count += 1;
+    } else if (line.type === 'event_msg' && payload.type === 'agent_message') {
+      const signature = messageSignature('assistant', payload.message || '');
+      if (!canonicalMessages.has(signature)) count += 1;
+    }
+  }
+  return count;
 }
 
 function turn(entry, turns, line, kind, title, text, meta = {}) {
@@ -145,18 +222,6 @@ function turn(entry, turns, line, kind, title, text, meta = {}) {
     raw: line,
     meta,
   };
-}
-
-function isAssistantMessage(line) {
-  const payload = line.payload || {};
-  return (
-    (line.type === 'event_msg' && payload.type === 'agent_message') ||
-    (line.type === 'response_item' && payload.type === 'message' && payload.role !== 'user')
-  );
-}
-
-function isDisplayEvent(type) {
-  return Boolean(type && !['user_message', 'agent_message', 'token_count'].includes(type));
 }
 
 function codexUserMessageText(payload) {
@@ -192,9 +257,14 @@ function stringifyOutput(output) {
   return JSON.stringify(output, null, 2);
 }
 
-function eventText(payload) {
-  const copy = { ...payload };
-  return JSON.stringify(copy, null, 2);
+function compactedText(payload) {
+  const message = typeof payload.message === 'string' && payload.message.trim()
+    ? payload.message.trim()
+    : 'Context compacted';
+  const replacementCount = Array.isArray(payload.replacement_history) ? payload.replacement_history.length : 0;
+  return replacementCount
+    ? `${message}\nReplacement history entries: ${replacementCount}`
+    : message;
 }
 
 function projectFromCwd(cwd) {

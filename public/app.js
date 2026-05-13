@@ -3,6 +3,9 @@ const DEFAULT_REFRESH_INTERVAL_MS = 30_000;
 const SESSION_PAGE_SIZE = 20;
 const SESSION_TURN_LIMIT = 120;
 const ANALYSIS_STAGE_INTERVAL_MS = 1400;
+const TURN_PREFERENCES_KEY = 'runwhy:turns:v1';
+const LONG_GAP_THRESHOLD_MS = 60_000;
+const TURN_KIND_FILTERS = new Set(['all', 'user', 'assistant', 'tool_call', 'tool_result', 'compacted']);
 const ANALYSIS_STAGES = [
   ['Request', 'Session, template, and focus prepared.'],
   ['Evidence', 'Building redacted turn evidence and trusted timing metrics.'],
@@ -23,6 +26,7 @@ const state = {
   filter: '',
   active: null,
   activeSession: null,
+  activeSessionData: null,
   recapMarkdown: '',
   autoRefresh: true,
   refreshIntervalMs: DEFAULT_REFRESH_INTERVAL_MS,
@@ -40,6 +44,7 @@ const state = {
   analysisProgressStatus: 'idle',
   sidebarCollapsed: false,
   detailCollapsed: false,
+  turnKindFilter: 'all',
   analyzedSessionKeys: new Set(),
 };
 
@@ -77,8 +82,43 @@ function shortTime(ts) {
   });
 }
 
+function formatFullDateTime(ts) {
+  if (!ts) return '';
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return '';
+  return [
+    date.getFullYear(),
+    pad2(date.getMonth() + 1),
+    pad2(date.getDate()),
+  ].join('-') + ' ' + [pad2(date.getHours()), pad2(date.getMinutes())].join(':');
+}
+
+function formatDateGroup(ts) {
+  const full = formatFullDateTime(ts);
+  return full ? full.slice(0, 10) : 'Unknown date';
+}
+
+function formatSessionRange(session) {
+  const start = formatFullDateTime(session.createdAt);
+  const end = formatFullDateTime(session.updatedAt);
+  if (start && end && start !== end) return `${start} -> ${end}`;
+  return end || start || 'No timestamp';
+}
+
+function sessionDurationMs(session) {
+  const start = Date.parse(session.createdAt || '');
+  const end = Date.parse(session.updatedAt || '');
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+  return end - start;
+}
+
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
 async function init() {
   restoreLayoutState();
+  restoreTurnPreferences();
   await loadProviders();
   await loadAnalysisTemplates();
   await loadSessions({ reset: true });
@@ -192,10 +232,23 @@ function renderSessionList() {
     return;
   }
 
+  let currentGroup = '';
   for (const session of sessions) {
+    const group = formatDateGroup(session.updatedAt || session.createdAt);
+    if (group !== currentGroup) {
+      currentGroup = group;
+      list.appendChild(renderSessionDateGroup(group));
+    }
     list.appendChild(renderSessionItem(session));
   }
   renderSessionPaging();
+}
+
+function renderSessionDateGroup(label) {
+  const el = document.createElement('div');
+  el.className = 'session-date-group';
+  el.textContent = label;
+  return el;
 }
 
 function renderSessionItem(session) {
@@ -208,6 +261,7 @@ function renderSessionItem(session) {
 
   const summary = session.summary || {};
   const project = session.project || session.cwd || session.id;
+  const duration = sessionDurationMs(session);
   item.innerHTML = `
     <div class="si-row">
       <span class="provider ${escapeHtml(session.provider)}">${escapeHtml(formatProviderLabel(session.provider))}</span>
@@ -215,8 +269,9 @@ function renderSessionItem(session) {
     </div>
     ${renderSessionChips(session)}
     <div class="si-project">${escapeHtml(project)}</div>
+    <div class="si-time">${escapeHtml(formatSessionRange(session))}</div>
     <div class="si-meta">
-      <span>${shortTime(session.updatedAt)}</span>
+      <span>${escapeHtml(formatDuration(duration))}</span>
       <span>${summary.turns || 0} turns</span>
     </div>
   `;
@@ -272,11 +327,12 @@ async function loadSession(session, options = {}) {
     title: session.title || session.id,
     project: session.project || '',
   };
+  state.activeSessionData = null;
   renderSessionList();
   if (!silent) showLoading(session);
 
   try {
-    renderSession(await fetchSessionDetail(session));
+    renderSession(await fetchSessionDetail(session), { preserveScroll: silent });
   } catch (err) {
     if (silent) {
       state.refreshError = err.message || String(err);
@@ -290,6 +346,7 @@ async function loadSession(session, options = {}) {
 async function loadRecap() {
   state.active = 'recap';
   state.activeSession = null;
+  state.activeSessionData = null;
   renderSessionList();
   $('empty').hidden = true;
   $('session-view').hidden = true;
@@ -322,10 +379,12 @@ async function loadRecap() {
 
 function showEmpty() {
   state.activeSession = null;
+  state.activeSessionData = null;
   $('empty').hidden = false;
   $('recap-view').hidden = true;
   $('session-view').hidden = true;
   clearAnalysis();
+  renderTurnControls();
 }
 
 function showLoading(session) {
@@ -338,9 +397,11 @@ function showLoading(session) {
   $('session-context').innerHTML = '';
   $('turns').innerHTML = '<div class="loading">loading session...</div>';
   clearAnalysis('Select a loaded session to analyze.');
+  renderTurnControls();
 }
 
 function showError(session, message) {
+  state.activeSessionData = null;
   $('empty').hidden = true;
   $('recap-view').hidden = true;
   $('session-view').hidden = false;
@@ -352,6 +413,7 @@ function showError(session, message) {
   el.className = 'error';
   el.textContent = message;
   $('turns').appendChild(el);
+  renderTurnControls();
 }
 
 function showRecapError(message) {
@@ -363,7 +425,7 @@ function showRecapError(message) {
   $('recap-content').appendChild(el);
 }
 
-function renderSession(data) {
+function renderSession(data, options = {}) {
   const session = data.session;
   const summary = session.summary || {};
 
@@ -376,6 +438,7 @@ function renderSession(data) {
   };
   state.lastRefreshAt = new Date();
   state.refreshError = '';
+  state.activeSessionData = data;
 
   $('empty').hidden = true;
   $('recap-view').hidden = true;
@@ -387,8 +450,8 @@ function renderSession(data) {
   `;
   $('session-meta').innerHTML = `
     <div>${escapeHtml(session.project || '')} <span class="dim">${escapeHtml(session.id)}</span></div>
-    <div>${escapeHtml(fmtTime(session.createdAt))} -> ${escapeHtml(fmtTime(session.updatedAt))}</div>
-    <div>model: ${escapeHtml(session.model || '-')}</div>
+    <div>${escapeHtml(formatSessionRange(session))}</div>
+    <div>${escapeHtml(formatDuration(sessionDurationMs(session)))} · ${summary.turns || 0} turns · model: ${escapeHtml(session.model || '-')}</div>
   `;
   $('session-totals').innerHTML = `
     <div class="stat cost"><div class="label">Cost</div><div class="value">${fmtCost(summary.costUSD)}</div></div>
@@ -400,18 +463,8 @@ function renderSession(data) {
   `;
   renderContext(session);
   restoreAnalysis();
-
-  const turns = $('turns');
-  turns.innerHTML = '';
-  if (data.turnsTotal > (data.turns || []).length) {
-    const note = document.createElement('div');
-    note.className = 'turn-window-note';
-    note.textContent = `Showing latest ${(data.turns || []).length} of ${data.turnsTotal} turns.`;
-    turns.appendChild(note);
-  }
-  for (const turn of data.turns || []) {
-    turns.appendChild(renderTurn(turn));
-  }
+  renderTurnControls();
+  renderTurns(data, options);
   renderRefreshStatus();
 }
 
@@ -472,45 +525,150 @@ function renderContext(session) {
     .join('');
 }
 
+function renderTurns(data, options = {}) {
+  const turns = $('turns');
+  turns.className = 'turns';
+  turns.innerHTML = '';
+  if (data.turnsTotal > (data.turns || []).length) {
+    const note = document.createElement('div');
+    note.className = 'turn-window-note';
+    note.textContent = `Showing latest ${(data.turns || []).length} of ${data.turnsTotal} turns.`;
+    turns.appendChild(note);
+  }
+
+  const visibleTurns = filterTurnsByKind(data.turns || []);
+  const decorated = decorateTurns(visibleTurns);
+  const rendered = decorated;
+  let currentGroup = '';
+  for (const turn of rendered) {
+    const group = formatDateGroup(turn.timestamp);
+    if (group !== currentGroup) {
+      currentGroup = group;
+      turns.appendChild(renderTurnDateGroup(group));
+    }
+    turns.appendChild(renderTurn(turn));
+  }
+
+  if (!rendered.length && (data.turns || []).length) {
+    const note = document.createElement('div');
+    note.className = 'turn-window-note';
+    note.textContent = 'No turns match the selected type in the current loaded window.';
+    turns.appendChild(note);
+  }
+}
+
+function filterTurnsByKind(turns) {
+  if (state.turnKindFilter === 'all') return turns;
+  return turns.filter((turn) => turn.kind === state.turnKindFilter);
+}
+
+function decorateTurns(turns) {
+  return turns.map((turn, index) => {
+    const previous = turns[index - 1];
+    const timestamp = Date.parse(turn.timestamp || '');
+    const previousTimestamp = Date.parse(previous?.timestamp || '');
+    const gapFromPreviousMs = Number.isFinite(timestamp) && Number.isFinite(previousTimestamp) && timestamp >= previousTimestamp
+      ? timestamp - previousTimestamp
+      : null;
+    return {
+      ...turn,
+      renderIndex: index,
+      gapFromPreviousMs,
+      isLongGap: isLongGap(gapFromPreviousMs),
+    };
+  });
+}
+
+function renderTurnDateGroup(label) {
+  const el = document.createElement('div');
+  el.className = 'turn-date-group';
+  el.textContent = label;
+  return el;
+}
+
+function isLongGap(ms) {
+  return Number.isFinite(Number(ms)) && Number(ms) >= LONG_GAP_THRESHOLD_MS;
+}
+
 function renderTurn(turn) {
   const el = document.createElement('article');
-  el.className = 'turn ' + turn.kind;
+  el.className = [
+    'turn',
+    turn.kind,
+    turn.isLongGap ? 'long-gap' : '',
+  ].filter(Boolean).join(' ');
   el.id = turnElementId(turn.id);
   el.dataset.turnId = turn.id || '';
+  el.dataset.renderIndex = String(turn.renderIndex ?? '');
 
   const head = document.createElement('div');
   head.className = 'turn-head';
   head.innerHTML = `
     <div class="left">
       <span class="role ${escapeHtml(turn.kind)}">${escapeHtml(turn.kind)}</span>
-      <span class="ts">${escapeHtml(shortTime(turn.timestamp))}</span>
+      <span class="ts">${escapeHtml(formatFullDateTime(turn.timestamp) || shortTime(turn.timestamp))}</span>
+      ${turn.isLongGap ? `<span class="gap-badge">${escapeHtml(formatDuration(turn.gapFromPreviousMs))} gap</span>` : ''}
       <span class="turn-title">${escapeHtml(turn.title || '')}</span>
     </div>
     ${usageHtml(turn)}
   `;
   el.appendChild(head);
 
+  if (isToolTurn(turn)) {
+    el.appendChild(renderToolDetails(turn));
+  } else {
+    const body = document.createElement('div');
+    body.className = 'turn-body';
+    body.textContent = turn.text || '';
+    el.appendChild(body);
+
+    requestAnimationFrame(() => {
+      if (body.scrollHeight > 360) {
+        body.classList.add('collapsed');
+        const btn = document.createElement('button');
+        btn.className = 'expand-btn';
+        btn.type = 'button';
+        btn.textContent = 'Expand';
+        btn.addEventListener('click', () => {
+          body.classList.toggle('collapsed');
+          btn.textContent = body.classList.contains('collapsed') ? 'Expand' : 'Collapse';
+        });
+        el.appendChild(btn);
+      }
+    });
+  }
+
+  return el;
+}
+
+function isToolTurn(turn) {
+  return turn.kind === 'tool_call' || turn.kind === 'tool_result';
+}
+
+function renderToolDetails(turn) {
+  const details = document.createElement('details');
+  details.className = 'turn-details';
+  details.open = false;
+
+  const summary = document.createElement('summary');
+  const label = document.createElement('span');
+  label.textContent = turn.kind === 'tool_call' ? 'Tool call' : 'Tool result';
+  const preview = document.createElement('span');
+  preview.className = 'turn-preview';
+  preview.textContent = turnPreview(turn.text);
+  summary.append(label, preview);
+
   const body = document.createElement('div');
   body.className = 'turn-body';
   body.textContent = turn.text || '';
-  el.appendChild(body);
+  details.append(summary, body);
+  return details;
+}
 
-  requestAnimationFrame(() => {
-    if (body.scrollHeight > 360) {
-      body.classList.add('collapsed');
-      const btn = document.createElement('button');
-      btn.className = 'expand-btn';
-      btn.type = 'button';
-      btn.textContent = 'Expand';
-      btn.addEventListener('click', () => {
-        body.classList.toggle('collapsed');
-        btn.textContent = body.classList.contains('collapsed') ? 'Expand' : 'Collapse';
-      });
-      el.appendChild(btn);
-    }
-  });
-
-  return el;
+function turnPreview(text) {
+  const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!normalized) return 'No payload';
+  return normalized.length > 120 ? normalized.slice(0, 117) + '...' : normalized;
 }
 
 function turnElementId(turnId) {
@@ -560,6 +718,47 @@ function saveLayoutState() {
   } catch {}
 }
 
+function restoreTurnPreferences() {
+  try {
+    const raw = localStorage.getItem(TURN_PREFERENCES_KEY);
+    if (raw) {
+      const prefs = JSON.parse(raw);
+      if (TURN_KIND_FILTERS.has(prefs.turnKindFilter)) {
+        state.turnKindFilter = prefs.turnKindFilter;
+      }
+    }
+  } catch {}
+  renderTurnControls();
+}
+
+function saveTurnPreferences() {
+  try {
+    localStorage.setItem(TURN_PREFERENCES_KEY, JSON.stringify({
+      turnKindFilter: state.turnKindFilter,
+    }));
+  } catch {}
+}
+
+function renderTurnControls() {
+  const hasSession = Boolean(state.activeSessionData);
+  const filter = $('turn-kind-filter');
+  if (filter) {
+    filter.value = state.turnKindFilter;
+    filter.disabled = !hasSession;
+  }
+  const turns = $('turns');
+  if (turns) turns.className = 'turns';
+}
+
+function toggleTurnKindFilter(kind) {
+  if (!TURN_KIND_FILTERS.has(kind)) return;
+  if (state.turnKindFilter === kind) return;
+  state.turnKindFilter = kind;
+  saveTurnPreferences();
+  renderTurnControls();
+  if (state.activeSessionData) renderTurns(state.activeSessionData, { preserveScroll: true });
+}
+
 function renderLayoutState() {
   const app = $('app');
   if (!app) return;
@@ -601,7 +800,7 @@ async function refreshActiveSession() {
   renderRefreshStatus();
   try {
     const data = await fetchSessionDetail(sessionRef);
-    if (state.active === sessionKey(sessionRef)) renderSession(data);
+    if (state.active === sessionKey(sessionRef)) renderSession(data, { preserveScroll: true, scrollToLatest: false });
   } catch (err) {
     state.refreshError = err.message || String(err);
   } finally {
@@ -1149,17 +1348,47 @@ async function writeClipboard(text) {
 function jumpToEvidence(turnId) {
   const el = document.getElementById(turnElementId(turnId));
   if (!el) {
+    const hiddenTurn = state.activeSessionData?.turns?.some((turn) => turn.id === turnId);
+    if (hiddenTurn && state.turnKindFilter !== 'all') {
+      state.turnKindFilter = 'all';
+      saveTurnPreferences();
+      renderTurnControls();
+      renderTurns(state.activeSessionData, { preserveScroll: true });
+      requestAnimationFrame(() => jumpToEvidence(turnId));
+      return;
+    }
     setAnalysisCacheNote(`Evidence turn not loaded: ${turnId}`);
     return;
   }
+  expandEvidenceTurn(el);
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  document.querySelectorAll('.turn.evidence-active').forEach((turn) => {
+  document.querySelectorAll('.turn.evidence-active, .turn.evidence-context').forEach((turn) => {
     turn.classList.remove('evidence-active');
+    turn.classList.remove('evidence-context');
   });
   el.classList.add('evidence-active');
+  const turnEls = [...document.querySelectorAll('.turn')];
+  const index = turnEls.indexOf(el);
+  for (const neighbor of [turnEls[index - 1], turnEls[index + 1]]) {
+    if (neighbor) neighbor.classList.add('evidence-context');
+  }
   setTimeout(() => {
     el.classList.remove('evidence-active');
+    document.querySelectorAll('.turn.evidence-context').forEach((turn) => {
+      turn.classList.remove('evidence-context');
+    });
   }, 2400);
+}
+
+function expandEvidenceTurn(el) {
+  const details = el.querySelector('.turn-details');
+  if (details) details.open = true;
+  const body = el.querySelector('.turn-body.collapsed');
+  if (body) {
+    body.classList.remove('collapsed');
+    const button = el.querySelector('.expand-btn');
+    if (button) button.textContent = 'Collapse';
+  }
 }
 
 function formatDuration(ms) {
@@ -1204,6 +1433,10 @@ $('toggle-sidebar').addEventListener('click', () => {
 
 $('toggle-detail-rail').addEventListener('click', () => {
   toggleDetailRail();
+});
+
+$('turn-kind-filter').addEventListener('change', (event) => {
+  toggleTurnKindFilter(event.target.value);
 });
 
 $('refresh-sessions').addEventListener('click', () => {

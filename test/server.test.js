@@ -47,7 +47,7 @@ test('server exposes provider-neutral APIs without absolute file paths', async (
   const limitedDetail = await json(base, '/api/session?provider=codex&id=rollout-sample&turnLimit=2');
   assert.equal(limitedDetail.turns.length, 2);
   assert.equal(limitedDetail.turnsTotal, 6);
-  assert.deepEqual(limitedDetail.turns.map((turn) => turn.kind), ['tool_result', 'event']);
+  assert.deepEqual(limitedDetail.turns.map((turn) => turn.kind), ['tool_result', 'compacted']);
 
   const bad = await fetch(`${base}/api/session?provider=codex&id=${encodeURIComponent('/etc/passwd')}`);
   assert.equal(bad.status, 404);
@@ -84,6 +84,18 @@ test('server serves static frontend assets', async (t) => {
   assert.match(html, /analysis-cache-note/);
   assert.match(html, /toggle-sidebar/);
   assert.match(html, /toggle-detail-rail/);
+  assert.match(html, /turn-kind-filter/);
+  assert.match(html, />ALL</);
+  assert.match(html, />USER</);
+  assert.match(html, />Assistant</);
+  assert.match(html, />TOOL_CALL</);
+  assert.match(html, />TOOL_RESULT</);
+  assert.match(html, />COMPACTED</);
+  assert.doesNotMatch(html, /turn-order-toggle/);
+  assert.doesNotMatch(html, /jump-latest-turn/);
+  assert.doesNotMatch(html, /density-toggle/);
+  assert.doesNotMatch(html, /turn-scope-toggle/);
+  assert.doesNotMatch(html, /Latest first/);
   assert.match(html, /<details class="side-section workspace-section"/);
 
   const css = await fetch(`${base}/style.css`).then((r) => r.text());
@@ -101,6 +113,11 @@ test('server serves static frontend assets', async (t) => {
   assert.match(css, /\.delay-timeline/);
   assert.match(css, /\.evidence-jump/);
   assert.match(css, /\.turn\.evidence-active/);
+  assert.match(css, /\.turn\.evidence-context/);
+  assert.match(css, /\.turn\.long-gap/);
+  assert.match(css, /\.turn-date-group/);
+  assert.match(css, /\.session-date-group/);
+  assert.match(css, /\.turn-details/);
   assert.match(css, /\.session-chip/);
   assert.match(css, /\.analysis-cache-note/);
 
@@ -122,6 +139,20 @@ test('server serves static frontend assets', async (t) => {
   assert.match(appJs, /renderDiagnosisHero/);
   assert.match(appJs, /renderDelayTimeline/);
   assert.match(appJs, /jumpToEvidence/);
+  assert.match(appJs, /renderSessionDateGroup/);
+  assert.match(appJs, /formatFullDateTime/);
+  assert.match(appJs, /formatSessionRange/);
+  assert.match(appJs, /restoreTurnPreferences/);
+  assert.match(appJs, /filterTurnsByKind/);
+  assert.match(appJs, /toggleTurnKindFilter/);
+  assert.doesNotMatch(appJs, /toggleTurnOrder/);
+  assert.doesNotMatch(appJs, /toggleTurnDensity/);
+  assert.doesNotMatch(appJs, /toggleTurnScope/);
+  assert.doesNotMatch(appJs, /jumpToLatestTurn/);
+  assert.match(appJs, /decorateTurns/);
+  assert.match(appJs, /renderTurnDateGroup/);
+  assert.match(appJs, /isLongGap/);
+  assert.match(appJs, /expandEvidenceTurn/);
   assert.match(appJs, /renderSessionChips/);
 });
 

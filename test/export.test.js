@@ -20,7 +20,8 @@ test('createSessionExport reads one demo session and renders markdown', () => {
 
   assert.equal(sessionExport.session.id, 'rollout-demo');
   assert.equal(sessionExport.session.provider, 'codex');
-  assert.equal(sessionExport.turns.length, 7);
+  assert.equal(sessionExport.turns.length, 5);
+  assert.equal(sessionExport.turns.some((turn) => turn.title === 'agent_message_delta'), false);
   assert.match(markdown, /# Agent Session Export/);
   assert.match(markdown, /Provider: codex/);
   assert.match(markdown, /Session ID: rollout-demo/);

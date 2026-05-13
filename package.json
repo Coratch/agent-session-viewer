@@ -1,6 +1,6 @@
 {
   "name": "runwhy",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "RunWhy: local flight recorder and time diagnosis for AI coding agents.",
   "license": "MIT",
   "private": false,

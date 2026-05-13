@@ -108,6 +108,19 @@
               <span id="last-refresh" class="last-refresh">Not refreshed yet</span>
             </div>
           </div>
+          <div class="session-toolbar" aria-label="session view controls">
+            <label class="turn-filter-control">
+              <span>Type</span>
+              <select id="turn-kind-filter" aria-label="turn type filter">
+                <option value="all">ALL</option>
+                <option value="user">USER</option>
+                <option value="assistant">Assistant</option>
+                <option value="tool_call">TOOL_CALL</option>
+                <option value="tool_result">TOOL_RESULT</option>
+                <option value="compacted">COMPACTED</option>
+              </select>
+            </label>
+          </div>
         </header>
         <div id="turns" class="turns"></div>
       </section>

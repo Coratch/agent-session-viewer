@@ -1,0 +1,15 @@
+{"timestamp":"2026-05-13T08:25:05.945Z","type":"session_meta","payload":{"id":"codex-duplicate-session","timestamp":"2026-05-13T08:25:05.945Z","cwd":"/tmp/repo","originator":"codex_cli","cli_version":"1.0.0","source":"cli","model_provider":"openai","git":{"branch":"main"}}}
+{"timestamp":"2026-05-13T08:25:05.950Z","type":"event_msg","payload":{"type":"task_started","turn_id":"turn-duplicate-1","started_at":1778660705}}
+{"timestamp":"2026-05-13T08:25:05.950Z","type":"response_item","payload":{"type":"message","role":"developer","content":[{"type":"input_text","text":"developer instructions"}]}}
+{"timestamp":"2026-05-13T08:25:05.950Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"# AGENTS.md instructions for /tmp/repo\n\n<INSTRUCTIONS>\n# Basic Rules\n\n1. Think in English and answer in Chinese.\n</INSTRUCTIONS>"}]}}
+{"timestamp":"2026-05-13T08:25:05.950Z","type":"turn_context","payload":{"turn_id":"turn-duplicate-1","cwd":"/tmp/repo","model":"gpt-5.5","effort":"xhigh","collaboration_mode":"default"}}
+{"timestamp":"2026-05-13T08:25:05.952Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"fix duplicate turns"}]}}
+{"timestamp":"2026-05-13T08:25:05.952Z","type":"event_msg","payload":{"type":"user_message","message":"fix duplicate turns","images":[],"local_images":[],"text_elements":[]}}
+{"timestamp":"2026-05-13T08:25:06.000Z","type":"event_msg","payload":{"type":"agent_message","message":"I will inspect the duplicated log."}}
+{"timestamp":"2026-05-13T08:25:06.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"I will inspect the duplicated log."}]}}
+{"timestamp":"2026-05-13T08:25:07.000Z","type":"response_item","payload":{"type":"reasoning","summary":[{"type":"summary_text","text":"saw duplicate UI events"}],"content":[],"encrypted_content":"hidden"}}
+{"timestamp":"2026-05-13T08:25:07.100Z","type":"response_item","payload":{"type":"reasoning","summary":[{"type":"summary_text","text":"saw duplicate UI events"}],"content":[],"encrypted_content":"hidden"}}
+{"timestamp":"2026-05-13T08:25:08.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"{\"cmd\":\"pwd\"}","call_id":"call-1"}}
+{"timestamp":"2026-05-13T08:25:09.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call-1","output":"/tmp/repo\n"}}
+{"timestamp":"2026-05-13T08:25:10.000Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"turn-duplicate-1","last_agent_message":"done"}}
+{"timestamp":"2026-05-13T08:25:10.100Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"turn-duplicate-1","last_agent_message":"done"}}

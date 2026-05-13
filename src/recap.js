@@ -178,6 +178,11 @@ function collectTurns(recap, detail, redactionLevel) {
     if (isDecision(text)) pushUnique(recap.keyDecisions, label, redactionLevel);
   }
 
+  for (const rawCompletion of codexTaskCompletions(detail)) {
+    completed = true;
+    completion = `${detail.session.title || detail.session.id}: ${compact(redactText(rawCompletion, { level: redactionLevel }))}`;
+  }
+
   if (completion) {
     pushUnique(recap.completed, completion, redactionLevel);
   } else if (!completed && lastTurn) {
@@ -251,6 +256,28 @@ function eventCompletionText(text) {
   } catch {
     return text;
   }
+}
+
+function codexTaskCompletions(detail) {
+  if (detail.session.provider !== 'codex' || !detail.session.file) return [];
+  let text = '';
+  try {
+    text = fs.readFileSync(detail.session.file, 'utf8');
+  } catch {
+    return [];
+  }
+  const out = [];
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const record = JSON.parse(line);
+      const payload = record.payload || {};
+      if (record.type === 'event_msg' && payload.type === 'task_complete') {
+        out.push(payload.last_agent_message || payload.message || payload.type || '');
+      }
+    } catch {}
+  }
+  return out.filter(Boolean);
 }
 
 function isDecision(text) {
