@@ -65,3 +65,25 @@ test('parseArgs accepts recap options with demo fixtures', () => {
   assert.equal(cfg.claudeDir, path.join(__dirname, '..', 'examples', 'fixtures', 'claude', 'projects'));
   assert.equal(cfg.codexDir, path.join(__dirname, '..', 'examples', 'fixtures', 'codex', 'sessions'));
 });
+
+test('parseArgs accepts export options with redaction level', () => {
+  const cfg = parseArgs([
+    'export',
+    '--demo',
+    '--provider', 'codex',
+    '--id', 'rollout-demo',
+    '--format', 'markdown',
+    '--redaction', 'strict',
+    '--out', 'session.md',
+  ]);
+
+  assert.equal(cfg.command, 'export');
+  assert.equal(cfg.demo, true);
+  assert.deepEqual(cfg.providers, ['codex']);
+  assert.equal(cfg.sessionId, 'rollout-demo');
+  assert.equal(cfg.format, 'markdown');
+  assert.equal(cfg.redactionLevel, 'strict');
+  assert.equal(cfg.outFile, 'session.md');
+  assert.equal(cfg.claudeDir, path.join(__dirname, '..', 'examples', 'fixtures', 'claude', 'projects'));
+  assert.equal(cfg.codexDir, path.join(__dirname, '..', 'examples', 'fixtures', 'codex', 'sessions'));
+});

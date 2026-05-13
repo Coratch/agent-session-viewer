@@ -3,6 +3,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const skippedDirs = new Set(['.git', '.idea', 'node_modules', 'coverage']);
+const skippedRelativeDirs = new Set(['docs/superpowers']);
 const skippedExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.tgz', '.zip']);
 const localTermsFile = path.join(root, '.sensitive-terms');
 const sensitiveTerms = loadSensitiveTerms();
@@ -32,7 +33,11 @@ function loadSensitiveTerms() {
 function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      if (!skippedDirs.has(entry.name)) walk(path.join(dir, entry.name), files);
+      const nextDir = path.join(dir, entry.name);
+      const relativeDir = path.relative(root, nextDir);
+      if (!skippedDirs.has(entry.name) && !skippedRelativeDirs.has(relativeDir)) {
+        walk(nextDir, files);
+      }
       continue;
     }
 

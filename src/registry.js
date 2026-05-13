@@ -24,9 +24,19 @@ function createRegistry(providers) {
         rootDir: provider.rootDir,
       }));
     },
-    listSessions(providerFilter = 'all') {
+    countSessions(providerFilter = 'all') {
       return selectedProviders(providers, providerFilter)
-        .flatMap((provider) => provider.listSessions())
+        .reduce((total, provider) => {
+          if (typeof provider.countSessions === 'function') return total + provider.countSessions();
+          return total + provider.listSessions().length;
+        }, 0);
+    },
+    listSessions(providerFilter = 'all', options = {}) {
+      const providerLimit = Number.isInteger(options.limit) && options.limit > 0
+        ? options.limit
+        : undefined;
+      return selectedProviders(providers, providerFilter)
+        .flatMap((provider) => provider.listSessions({ limit: providerLimit }))
         .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
     },
     readSession(providerId, sessionId) {

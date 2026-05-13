@@ -1,0 +1,7 @@
+{"timestamp":"2026-05-12T01:00:00.000Z","type":"session_meta","payload":{"id":"multi-complete-demo","timestamp":"2026-05-12T01:00:00.000Z","cwd":"/workspace/multi-complete","originator":"codex_cli","git":{"branch":"main"}}}
+{"timestamp":"2026-05-12T01:00:01.000Z","type":"turn_context","payload":{"turn_id":"turn-1","cwd":"/workspace/multi-complete","model":"gpt-5.2"}}
+{"timestamp":"2026-05-12T01:00:02.000Z","type":"event_msg","payload":{"type":"user_message","message":"Tighten recap completion grouping."}}
+{"timestamp":"2026-05-12T01:00:03.000Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"turn-1","last_agent_message":"First intermediate completion should not be listed.","completed_at":"2026-05-12T01:00:03.000Z"}}
+{"timestamp":"2026-05-12T01:00:04.000Z","type":"turn_context","payload":{"turn_id":"turn-2","cwd":"/workspace/multi-complete","model":"gpt-5.2"}}
+{"timestamp":"2026-05-12T01:00:05.000Z","type":"event_msg","payload":{"type":"user_message","message":"Finish the recap grouping fix."}}
+{"timestamp":"2026-05-12T01:00:06.000Z","type":"event_msg","payload":{"type":"task_complete","turn_id":"turn-2","last_agent_message":"Latest completion is the useful session summary.","completed_at":"2026-05-12T01:00:06.000Z"}}

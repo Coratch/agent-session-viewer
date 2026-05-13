@@ -21,8 +21,16 @@ function parseArgs(argv) {
     cfg.command = 'recap';
     cfg.days = 7;
     cfg.format = 'markdown';
-    cfg.redact = true;
+    cfg.redactionLevel = 'basic';
     parseRecapArgs(cfg, argv.slice(1));
+    return cfg;
+  }
+
+  if (argv[0] === 'export') {
+    cfg.command = 'export';
+    cfg.format = 'markdown';
+    cfg.redactionLevel = 'basic';
+    parseExportArgs(cfg, argv.slice(1));
     return cfg;
   }
 
@@ -64,6 +72,8 @@ function parseRecapArgs(cfg, argv) {
       cfg.project = requireValue(arg, argv[++i]);
     } else if (arg === '--format') {
       cfg.format = parseFormat(requireValue(arg, argv[++i]));
+    } else if (arg === '--redaction') {
+      cfg.redactionLevel = parseRedactionLevel(requireValue(arg, argv[++i]));
     } else if (arg === '--out' || arg === '-o') {
       cfg.outFile = requireValue(arg, argv[++i]);
     } else if (arg === '--provider' || arg === '--providers') {
@@ -78,6 +88,33 @@ function parseRecapArgs(cfg, argv) {
       cfg.help = true;
     } else {
       throw new Error(`Unknown recap argument: ${arg}`);
+    }
+  }
+}
+
+function parseExportArgs(cfg, argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--id') {
+      cfg.sessionId = requireValue(arg, argv[++i]);
+    } else if (arg === '--provider' || arg === '--providers') {
+      cfg.providers = parseProviders(requireValue(arg, argv[++i]));
+    } else if (arg === '--format') {
+      cfg.format = parseFormat(requireValue(arg, argv[++i]));
+    } else if (arg === '--redaction') {
+      cfg.redactionLevel = parseRedactionLevel(requireValue(arg, argv[++i]));
+    } else if (arg === '--out' || arg === '-o') {
+      cfg.outFile = requireValue(arg, argv[++i]);
+    } else if (arg === '--claude-dir') {
+      cfg.claudeDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--codex-dir') {
+      cfg.codexDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--demo') {
+      enableDemo(cfg);
+    } else if (arg === '--help' || arg === '-h') {
+      cfg.help = true;
+    } else {
+      throw new Error(`Unknown export argument: ${arg}`);
     }
   }
 }
@@ -99,6 +136,13 @@ function parsePositiveInteger(value, flag) {
 
 function parseFormat(value) {
   if (value !== 'markdown') throw new Error(`Unsupported format: ${value}`);
+  return value;
+}
+
+function parseRedactionLevel(value) {
+  if (!['basic', 'strict', 'none'].includes(value)) {
+    throw new Error(`Unsupported redaction level: ${value}`);
+  }
   return value;
 }
 

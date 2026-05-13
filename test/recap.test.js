@@ -20,7 +20,12 @@ test('createRecap builds a local markdown recap from demo sessions', () => {
   assert.match(markdown, /demo-app/);
   assert.match(markdown, /agent-session-viewer/);
   assert.match(markdown, /## Completed/);
-  assert.match(markdown, /npm test -- checkout-timeout/);
+  assert.doesNotMatch(markdown, /Read completed: test\/checkout-timeout\.test\.js/);
+  const completedSection = markdown.match(/## Completed\n\n([\s\S]*?)\n\n## Open Threads/)?.[1] || '';
+  assert.match(completedSection, /Demo inspection complete/);
+  assert.match(completedSection, /npm test -- checkout-timeout/);
+  assert.doesNotMatch(completedSection, /"type": "task_complete"/);
+  assert.doesNotMatch(completedSection, /\[tool_result\]/);
   assert.match(markdown, /## Commands And Files/);
   assert.match(markdown, /functions\.exec_command/);
   assert.doesNotMatch(markdown, /^- file:\s*$/m);
@@ -35,6 +40,22 @@ test('createRecap filters by provider and project', () => {
   assert.equal(recap.sessions[0].provider, 'codex');
   assert.equal(recap.projects.length, 1);
   assert.equal(recap.projects[0].name, 'agent-session-viewer');
+});
+
+test('createRecap keeps the latest completion per session', () => {
+  const cfg = parseArgs([
+    'recap',
+    '--provider', 'codex',
+    '--codex-dir', path.join(__dirname, 'fixtures', 'recap', 'codex', 'sessions'),
+    '--project', 'multi-complete',
+    '--days', '30',
+  ]);
+  const recap = createRecap(cfg, { now: new Date('2026-05-13T00:00:00.000Z') });
+
+  assert.equal(recap.sessions.length, 1);
+  assert.equal(recap.completed.length, 1);
+  assert.match(recap.completed[0], /Latest completion is the useful session summary/);
+  assert.doesNotMatch(recap.completed[0], /First intermediate completion/);
 });
 
 test('demo recap includes packaged fixtures without requiring a date range', () => {

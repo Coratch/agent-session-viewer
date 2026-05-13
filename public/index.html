@@ -3,56 +3,158 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>agent-session-viewer</title>
+<title>AgentLens</title>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div id="app">
-  <aside class="sidebar">
-    <header class="sidebar-head">
-      <h1>agent-session-viewer</h1>
-      <div id="provider-roots" class="roots"></div>
+  <header class="app-bar">
+    <div class="workspace-switcher">
+      <div class="brand-mark">AL</div>
+      <div class="workspace-name">
+        <h1>AgentLens</h1>
+        <p>Agent time diagnosis and replay</p>
+      </div>
+    </div>
+    <div class="topbar-controls">
       <select id="provider-filter" aria-label="provider filter">
         <option value="all">All providers</option>
       </select>
-      <input id="filter" type="search" placeholder="filter sessions..." autocomplete="off">
-      <div class="recap-controls">
+      <input id="filter" type="search" placeholder="Search sessions..." autocomplete="off">
+      <button id="refresh-sessions" type="button">Refresh Sources</button>
+      <label class="days-control">
+        <span>Days</span>
         <input id="recap-days" type="number" min="1" max="365" value="7" aria-label="recap days">
-        <button id="recap-btn" type="button">Recap</button>
+      </label>
+      <button id="recap-btn" class="nav-action report-action" type="button">Resume Work</button>
+    </div>
+  </header>
+  <aside class="sidebar">
+    <header class="sidebar-head">
+      <div class="sidebar-topbar">
+        <div class="sidebar-label">Sessions</div>
+        <button id="toggle-sidebar" class="layout-toggle sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Toggle sidebar">&lt;&lt;</button>
       </div>
+      <nav class="side-nav" aria-label="primary">
+        <button id="sessions-nav" class="nav-item active" type="button">
+          <span class="nav-glyph">S</span>
+          <span>Sessions</span>
+          <span id="session-count" class="nav-meta">0</span>
+        </button>
+      </nav>
+      <details class="side-section workspace-section">
+        <summary class="side-section-title">Sources</summary>
+        <div id="provider-roots" class="roots"></div>
+      </details>
     </header>
-    <div id="session-list" class="session-list"></div>
+    <section class="session-inbox">
+      <div class="side-section-title list-title">
+        <span>Sessions</span>
+        <span>Local</span>
+      </div>
+      <div id="session-list" class="session-list"></div>
+      <button id="load-more-sessions" class="load-more" type="button" hidden>Load more</button>
+    </section>
   </aside>
   <main class="main">
-    <div id="empty" class="empty">Pick a session on the left.</div>
-    <div id="recap-view" hidden>
-      <header class="session-head recap-head">
-        <div class="session-head-row">
-          <div class="session-title">
-            <h2>Pick Up Where I Left Off</h2>
-            <div id="recap-meta" class="session-meta"></div>
-          </div>
-          <div class="recap-actions">
-            <button id="copy-recap" type="button">Copy Markdown</button>
-          </div>
-        </div>
-      </header>
-      <div id="recap-content" class="recap-content"></div>
+    <div id="empty" class="empty">
+      <section class="empty-state">
+        <div class="empty-mark">AL</div>
+        <h2>No session selected</h2>
+        <p>Select a session or generate a work recap from the top bar.</p>
+      </section>
     </div>
-    <div id="session-view" hidden>
-      <header class="session-head">
-        <div class="session-head-row">
-          <div class="session-title">
-            <h2 id="session-title">-</h2>
-            <div id="session-meta" class="session-meta"></div>
+    <div id="recap-view" class="workspace-view" hidden>
+      <section class="work-panel">
+        <header class="session-head recap-head">
+          <div class="session-head-row">
+            <div class="session-title">
+              <div class="eyebrow">Recap</div>
+              <h2>Pick Up Where I Left Off</h2>
+              <div id="recap-meta" class="session-meta"></div>
+            </div>
+            <div class="recap-actions">
+              <button id="copy-recap" type="button">Copy Markdown</button>
+            </div>
           </div>
+        </header>
+        <div id="recap-content" class="recap-content"></div>
+      </section>
+      <aside class="detail-rail">
+        <div class="detail-rail-head">
+          <h3>Details</h3>
+        </div>
+        <div class="rail-section">
+          <h3>Properties</h3>
+          <dl>
+            <div><dt>Format</dt><dd>Markdown</dd></div>
+            <div><dt>Recommended</dt><dd>Strict redaction</dd></div>
+            <div><dt>Use</dt><dd>Issue, PR, new agent</dd></div>
+          </dl>
+        </div>
+        <div class="rail-note">CLI export can produce a focused single-session handoff.</div>
+      </aside>
+    </div>
+    <div id="session-view" class="workspace-view" hidden>
+      <section class="work-panel">
+        <header class="session-head">
+          <div class="session-head-row">
+            <div class="session-title">
+              <h2 id="session-title">-</h2>
+              <div id="session-meta" class="session-meta"></div>
+            </div>
+            <div class="refresh-controls" aria-label="refresh controls">
+              <button id="refresh-now" type="button">Reload Session</button>
+              <span id="last-refresh" class="last-refresh">Not refreshed yet</span>
+            </div>
+          </div>
+        </header>
+        <div id="turns" class="turns"></div>
+      </section>
+      <aside class="detail-rail">
+        <div class="detail-rail-head">
+          <h3>Inspector</h3>
+        </div>
+        <div class="rail-section">
+          <h3>Metrics</h3>
           <div id="session-totals" class="totals"></div>
         </div>
-        <div id="session-context" class="context-tags"></div>
-      </header>
-      <div id="turns" class="turns"></div>
+        <div class="rail-section">
+          <h3>Context</h3>
+          <div id="session-context" class="context-tags"></div>
+        </div>
+        <div class="rail-section sync-panel">
+          <h3>Refresh</h3>
+          <label class="refresh-toggle">
+            <input id="auto-refresh-toggle" type="checkbox" checked>
+            <span>Auto refresh</span>
+          </label>
+          <select id="refresh-interval" aria-label="refresh interval">
+            <option value="15000">15s</option>
+            <option value="30000" selected>30s</option>
+            <option value="60000">60s</option>
+          </select>
+        </div>
+        <div class="rail-section analysis-panel">
+          <h3>Analysis</h3>
+          <div class="analysis-controls">
+            <select id="analysis-template" aria-label="analysis template"></select>
+            <select id="analysis-llm" aria-label="analysis llm"></select>
+            <textarea id="analysis-prompt" rows="3" placeholder="Focus..." aria-label="custom analysis focus"></textarea>
+            <button id="run-analysis" type="button">Analyze</button>
+            <div class="analysis-actions">
+              <button id="copy-analysis" type="button" disabled>Copy Markdown</button>
+              <button id="clear-analysis" type="button" disabled>Clear</button>
+            </div>
+          </div>
+          <div id="analysis-progress" class="analysis-progress" aria-live="polite"></div>
+          <div id="analysis-cache-note" class="analysis-cache-note"></div>
+          <div id="analysis-result" class="analysis-result"></div>
+        </div>
+      </aside>
     </div>
   </main>
+  <button id="toggle-detail-rail" class="layout-toggle detail-rail-toggle" type="button" aria-label="Collapse details" aria-expanded="true" title="Toggle details">&gt;&gt;</button>
 </div>
 <script src="/app.js"></script>
 </body>

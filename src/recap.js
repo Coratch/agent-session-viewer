@@ -6,6 +6,7 @@ const { redactText } = require('./redaction');
 
 function createRecap(config, options = {}) {
   const now = options.now || new Date();
+  const redactionLevel = config.redactionLevel || 'basic';
   const since = recapSince(config, now);
   const registry = createRegistry(createDefaultProviders(config));
   const providerFilter = (config.providers || []).join(',') || 'all';
@@ -27,12 +28,13 @@ function createRecap(config, options = {}) {
     files: [],
     keyDecisions: [],
     nextActions: [],
+    redactionLevel,
   };
 
   const projects = new Map();
   for (const detail of sessions) {
-    collectProject(projects, detail.session);
-    collectTurns(recap, detail);
+    collectProject(projects, detail.session, redactionLevel);
+    collectTurns(recap, detail, redactionLevel);
   }
 
   recap.projects = [...projects.values()]
@@ -62,12 +64,13 @@ function recapSince(config, now) {
   return new Date(now.getTime() - (config.days || 7) * 24 * 60 * 60 * 1000);
 }
 
-function renderRecapMarkdown(recap) {
+function renderRecapMarkdown(recap, options = {}) {
+  const redactionLevel = options.redactionLevel || recap.redactionLevel || 'basic';
   return [
     '# Pick Up Where I Left Off',
     '',
-    `Generated: ${redactText(recap.generatedAt)}`,
-    `Range start: ${redactText(recap.since)}`,
+    `Generated: ${redactText(recap.generatedAt, { level: redactionLevel })}`,
+    `Range start: ${redactText(recap.since, { level: redactionLevel })}`,
     '',
     '## Summary',
     '',
@@ -83,37 +86,37 @@ function renderRecapMarkdown(recap) {
         project.lastActiveAt ? `last active: ${project.lastActiveAt}` : '',
       ].filter(Boolean);
       return `${project.name} (${parts.join('; ')})`;
-    })),
+    }), redactionLevel),
     '',
     '## Completed',
     '',
-    list(recap.completed),
+    list(recap.completed, redactionLevel),
     '',
     '## Open Threads',
     '',
-    list(recap.openThreads),
+    list(recap.openThreads, redactionLevel),
     '',
     '## Commands And Files',
     '',
     list([
       ...recap.commands.map((command) => `command: ${command}`),
       ...recap.files.map((file) => `file: ${file}`),
-    ]),
+    ], redactionLevel),
     '',
     '## Key Decisions',
     '',
-    list(recap.keyDecisions),
+    list(recap.keyDecisions, redactionLevel),
     '',
     '## Next Actions',
     '',
-    numbered(recap.nextActions),
+    numbered(recap.nextActions, redactionLevel),
     '',
   ].join('\n');
 }
 
 function writeRecap(config) {
   const recap = createRecap(config);
-  const markdown = renderRecapMarkdown(recap);
+  const markdown = renderRecapMarkdown(recap, { redactionLevel: config.redactionLevel });
   if (config.outFile) {
     fs.writeFileSync(config.outFile, markdown, 'utf8');
   } else {
@@ -137,12 +140,12 @@ function matchesProject(session, projectFilter) {
   ].some((value) => String(value || '').toLowerCase().includes(needle));
 }
 
-function collectProject(projects, session) {
-  const name = redactText(session.project || projectFromCwd(session.cwd) || session.provider);
+function collectProject(projects, session, redactionLevel) {
+  const name = redactText(session.project || projectFromCwd(session.cwd) || session.provider, { level: redactionLevel });
   const project = projects.get(name) || {
     name,
     providers: new Set(),
-    cwd: redactText(session.cwd || ''),
+    cwd: redactText(session.cwd || '', { level: redactionLevel }),
     branch: session.meta?.gitBranch || '',
     lastActiveAt: session.updatedAt,
     sessions: 0,
@@ -152,36 +155,41 @@ function collectProject(projects, session) {
   if (session.updatedAt && String(session.updatedAt).localeCompare(String(project.lastActiveAt || '')) > 0) {
     project.lastActiveAt = session.updatedAt;
   }
-  if (!project.cwd && session.cwd) project.cwd = redactText(session.cwd);
+  if (!project.cwd && session.cwd) project.cwd = redactText(session.cwd, { level: redactionLevel });
   if (!project.branch && session.meta?.gitBranch) project.branch = session.meta.gitBranch;
   projects.set(name, project);
 }
 
-function collectTurns(recap, detail) {
+function collectTurns(recap, detail, redactionLevel) {
   let completed = false;
+  let completion = '';
   let lastTurn = null;
   for (const turn of detail.turns || []) {
     lastTurn = turn;
-    const text = redactText(turn.text || '');
+    const text = redactText(turn.text || '', { level: redactionLevel });
     const label = `${detail.session.title || detail.session.id}: ${compact(text || turn.title || turn.kind)}`;
 
-    if (isCommandTurn(turn)) pushUnique(recap.commands, commandText(turn, text));
-    for (const file of fileHints(turn, text)) pushUnique(recap.files, file);
+    if (isCommandTurn(turn)) pushUnique(recap.commands, commandText(turn, text), redactionLevel);
+    for (const file of fileHints(turn, text, redactionLevel)) pushUnique(recap.files, file, redactionLevel);
     if (isCompleted(turn, text)) {
       completed = true;
-      pushUnique(recap.completed, label);
+      completion = completionLabel(detail, turn, text);
     }
-    if (isDecision(text)) pushUnique(recap.keyDecisions, label);
+    if (isDecision(text)) pushUnique(recap.keyDecisions, label, redactionLevel);
   }
 
-  if (!completed && lastTurn) {
+  if (completion) {
+    pushUnique(recap.completed, completion, redactionLevel);
+  } else if (!completed && lastTurn) {
     pushUnique(
       recap.openThreads,
-      `${detail.session.title || detail.session.id}: ${compact(redactText(lastTurn.text || lastTurn.title || 'Review latest turn'))}`,
+      `${detail.session.title || detail.session.id}: ${compact(redactText(lastTurn.text || lastTurn.title || 'Review latest turn', { level: redactionLevel }))}`,
+      redactionLevel,
     );
     pushUnique(
       recap.nextActions,
       `Resume ${detail.session.project || detail.session.title || detail.session.id} from the latest open thread.`,
+      redactionLevel,
     );
   }
 }
@@ -194,28 +202,55 @@ function commandText(turn, text) {
   return compact(`${turn.title || turn.kind} ${text}`);
 }
 
-function fileHints(turn, text) {
+function fileHints(turn, text, redactionLevel) {
   const out = [];
   const content = `${turn.title || ''}\n${text}`;
   const regex = /(?:[\w.-]+\/)+(?:[\w.-]+)/g;
   for (const match of content.match(regex) || []) {
-    if (!match.includes('://')) out.push(redactText(match));
+    if (!match.includes('://')) out.push(redactText(match, { level: redactionLevel }));
   }
 
   const rawContent = turn.raw?.message?.content;
   if (Array.isArray(rawContent)) {
     for (const block of rawContent) {
-      if (block?.input?.file_path) out.push(redactText(block.input.file_path));
+      if (block?.input?.file_path) out.push(redactText(block.input.file_path, { level: redactionLevel }));
     }
   }
   return out;
 }
 
 function isCompleted(turn, text) {
+  if (turn.kind === 'event') {
+    return turn.title === 'task_complete' || /"type":\s*"task_complete"/.test(text);
+  }
+  if (turn.kind !== 'assistant') return false;
   return (
-    /task_complete/.test(text) ||
     /\b(?:passed|success|successful|published|complete|completed)\b/i.test(text)
   );
+}
+
+function completionLabel(detail, turn, text) {
+  const title = detail.session.title || detail.session.id;
+  const summary = completionText(turn, text) || text || turn.title || turn.kind;
+  return `${title}: ${compact(summary)}`;
+}
+
+function completionText(turn, text) {
+  if (turn.kind === 'event') return eventCompletionText(text);
+  if (turn.kind === 'assistant') return text
+    .replace(/\[tool_result\]\s*/g, '')
+    .replace(/\[tool_use:[^\]]+\]\s*/g, '')
+    .replace(/\[thinking\]\s*/g, '');
+  return text;
+}
+
+function eventCompletionText(text) {
+  try {
+    const payload = JSON.parse(text);
+    return payload.last_agent_message || payload.message || payload.type || text;
+  } catch {
+    return text;
+  }
 }
 
 function isDecision(text) {
@@ -229,29 +264,29 @@ function summaryText(recap) {
   return `Found ${recap.sessions.length} sessions across ${recap.projects.length} active projects from ${providers}.`;
 }
 
-function list(items) {
+function list(items, redactionLevel = 'basic') {
   const filtered = items.filter(Boolean).slice(0, 20);
   if (!filtered.length) return '- No items found.';
-  return filtered.map((item) => `- ${redactText(item)}`).join('\n');
+  return filtered.map((item) => `- ${redactText(item, { level: redactionLevel })}`).join('\n');
 }
 
-function numbered(items) {
+function numbered(items, redactionLevel = 'basic') {
   const filtered = items.filter(Boolean).slice(0, 3);
   if (!filtered.length) return '1. Review recent sessions and choose the next task.';
-  return filtered.map((item, index) => `${index + 1}. ${redactText(item)}`).join('\n');
+  return filtered.map((item, index) => `${index + 1}. ${redactText(item, { level: redactionLevel })}`).join('\n');
 }
 
 function compact(value) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 220);
 }
 
-function uniqueLine(list, value) {
-  const clean = redactText(compact(value));
+function uniqueLine(list, value, redactionLevel = 'basic') {
+  const clean = redactText(compact(value), { level: redactionLevel });
   return list.includes(clean) ? '' : clean;
 }
 
-function pushUnique(list, value) {
-  const clean = uniqueLine(list, value);
+function pushUnique(list, value, redactionLevel = 'basic') {
+  const clean = uniqueLine(list, value, redactionLevel);
   if (clean) list.push(clean);
 }
 

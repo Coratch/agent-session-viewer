@@ -1,7 +1,7 @@
 {
   "name": "@coratch/agent-session-viewer",
-  "version": "0.2.1",
-  "description": "Local session replay and recap viewer for Claude Code and Codex JSONL logs.",
+  "version": "0.3.0",
+  "description": "AgentLens: local AI coding agent observability, replay, recap, and time diagnosis.",
   "license": "MIT",
   "private": false,
   "author": "Coratch",
@@ -16,7 +16,9 @@
   "keywords": [
     "agent",
     "agent-session",
+    "agent-diagnosis",
     "ai-coding",
+    "ai-observability",
     "claude-code",
     "claude-code-session",
     "claude-session-viewer",
@@ -41,7 +43,7 @@
     "agent-session-viewer": "bin/agent-session-viewer.js"
   },
   "scripts": {
-    "check": "node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check src/recap.js && node --check src/redaction.js && node --check public/app.js && node scripts/scan-sensitive.js",
+    "check": "node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check src/recap.js && node --check src/exporter.js && node --check src/redaction.js && node --check public/app.js && node scripts/scan-sensitive.js",
     "pack:check": "npm pack --dry-run",
     "start": "node src/cli.js",
     "test": "node --test"
@@ -53,6 +55,8 @@
     "bin/",
     "docs/assets/",
     "docs/demo.md",
+    "docs/issue-pr-recap-example.md",
+    "docs/post-release-metrics.md",
     "examples/fixtures/",
     "src/",
     "public/",

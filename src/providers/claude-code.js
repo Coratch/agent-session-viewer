@@ -9,8 +9,13 @@ function createClaudeCodeProvider({ rootDir }) {
     id: 'claude-code',
     label: 'Claude Code',
     rootDir,
-    listSessions() {
-      return listSessionFiles(rootDir).map((entry) => summarizeSessionFile(entry));
+    listSessions(options = {}) {
+      const limit = positiveLimit(options.limit);
+      const entries = listSessionFiles(rootDir);
+      return (limit ? entries.slice(0, limit) : entries).map((entry) => summarizeSessionFile(entry));
+    },
+    countSessions() {
+      return listSessionFiles(rootDir).length;
     },
     readSession(id) {
       const entry = findSessionFile(rootDir, id);
@@ -197,6 +202,10 @@ function safeStat(file) {
   } catch {
     return null;
   }
+}
+
+function positiveLimit(value) {
+  return Number.isInteger(value) && value > 0 ? value : null;
 }
 
 module.exports = {
