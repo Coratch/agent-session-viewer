@@ -5,3 +5,4 @@ coverage/
 *.tgz
 npm-debug.log*
 .sensitive-terms
+docs/superpowers/
