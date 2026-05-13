@@ -1,18 +1,18 @@
 {
   "name": "runwhy",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "RunWhy: local flight recorder and time diagnosis for AI coding agents.",
   "license": "MIT",
   "private": false,
   "author": "Coratch",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Coratch/agent-session-viewer.git"
+    "url": "git+https://github.com/Coratch/runwhy.git"
   },
   "bugs": {
-    "url": "https://github.com/Coratch/agent-session-viewer/issues"
+    "url": "https://github.com/Coratch/runwhy/issues"
   },
-  "homepage": "https://coratch.github.io/agent-session-viewer/",
+  "homepage": "https://coratch.github.io/runwhy/",
   "keywords": [
     "agent",
     "agent-session",

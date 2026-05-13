@@ -6,10 +6,10 @@ Snapshot date: 2026-05-13
 
 | Metric | Value | Source |
 | --- | ---: | --- |
-| npm latest version | `0.4.0` | `npm view runwhy dist-tags --json` |
-| GitHub stars | `0` | `gh repo view Coratch/agent-session-viewer --json stargazerCount` |
-| GitHub forks | `0` | `gh repo view Coratch/agent-session-viewer --json forkCount` |
-| GitHub watchers | `0` | `gh repo view Coratch/agent-session-viewer --json watchers` |
+| npm latest version | `0.4.1` | `npm view runwhy dist-tags --json` |
+| GitHub stars | `0` | `gh repo view Coratch/runwhy --json stargazerCount` |
+| GitHub forks | `0` | `gh repo view Coratch/runwhy --json forkCount` |
+| GitHub watchers | `0` | `gh repo view Coratch/runwhy --json watchers` |
 | npm weekly downloads | pending | New package name starts reporting after registry propagation |
 
 ## Notes

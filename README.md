@@ -11,9 +11,9 @@ Local flight recorder, replay, recap, and time diagnosis for AI coding agents.
 
 RunWhy reads local Claude Code and Codex JSONL logs directly, then turns them into a local Web UI for replay, recap, and evidence-backed time diagnosis. The `recap` command generates a local Markdown work summary without calling an external LLM. The Web UI can also run an optional single-session diagnosis through your local Claude CLI.
 
-![RunWhy preview](docs/assets/runwhy-preview.svg)
+![RunWhy Web UI](docs/assets/runwhy-ui.png)
 
-Open the [RunWhy site](https://coratch.github.io/agent-session-viewer/) for a product overview and static example. See the [demo walkthrough](docs/demo.md) for screenshots using sanitized Claude Code and Codex fixtures. See the [issue and PR recap example](docs/issue-pr-recap-example.md) for a shareable workflow.
+Open the [RunWhy site](https://coratch.github.io/runwhy/) for a product overview and static example. See the [demo walkthrough](docs/demo.md) for screenshots using sanitized Claude Code and Codex fixtures. See the [issue and PR recap example](docs/issue-pr-recap-example.md) for a shareable workflow.
 
 ## Why RunWhy
 
@@ -58,7 +58,7 @@ npx runwhy@latest recap --demo
 Install from GitHub when testing unreleased changes:
 
 ```bash
-npm install -g github:Coratch/agent-session-viewer
+npm install -g github:Coratch/runwhy
 ```
 
 ## What It Reads
