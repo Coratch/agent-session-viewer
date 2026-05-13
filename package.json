@@ -1,6 +1,6 @@
 {
   "name": "@coratch/agent-session-viewer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "AgentLens: local AI coding agent observability, replay, recap, and time diagnosis.",
   "license": "MIT",
   "private": false,
