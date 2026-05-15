@@ -68,4 +68,10 @@ test('CLI export writes markdown to --out path', () => {
   assert.match(markdown, /Provider: claude-code/);
   assert.match(markdown, /Session ID: session-claude-demo/);
   assert.match(markdown, /checkout timeout test/);
+  assert.match(markdown, /Reasoning: reasoning/);
+  assert.match(markdown, /Tool Call: Read/);
+  assert.match(markdown, /Hook: PostToolUse/);
+  assert.match(markdown, /Tool Result: tool_result/);
+  assert.doesNotMatch(markdown, /\[tool_use:/);
+  assert.doesNotMatch(markdown, /\[tool_result\]/);
 });

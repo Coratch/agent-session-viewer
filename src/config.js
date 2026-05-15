@@ -9,6 +9,7 @@ function parseArgs(argv) {
     command: 'serve',
     host: process.env.HOST || '127.0.0.1',
     port: parsePort(process.env.PORT, 4500),
+    ui: parseUi(process.env.RUNWHY_UI || 'react'),
     providers: parseProviders(process.env.PROVIDER || process.env.PROVIDERS),
     claudeDir: process.env.CLAUDE_PROJECTS_DIR ||
       process.env.CC_PROJECTS_DIR ||
@@ -46,6 +47,8 @@ function parseArgs(argv) {
       cfg.claudeDir = requireValue(arg, argv[++i]);
     } else if (arg === '--codex-dir') {
       cfg.codexDir = requireValue(arg, argv[++i]);
+    } else if (arg === '--ui') {
+      cfg.ui = parseUi(requireValue(arg, argv[++i]));
     } else if (arg === '--demo' || arg === 'demo') {
       enableDemo(cfg);
     } else if (/^\d+$/.test(arg)) {
@@ -142,6 +145,13 @@ function parseFormat(value) {
 function parseRedactionLevel(value) {
   if (!['basic', 'strict', 'none'].includes(value)) {
     throw new Error(`Unsupported redaction level: ${value}`);
+  }
+  return value;
+}
+
+function parseUi(value) {
+  if (!['classic', 'react'].includes(value)) {
+    throw new Error(`Unsupported UI: ${value}`);
   }
   return value;
 }

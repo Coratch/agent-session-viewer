@@ -228,7 +228,7 @@ function isCompleted(turn, text) {
   if (turn.kind === 'event') {
     return turn.title === 'task_complete' || /"type":\s*"task_complete"/.test(text);
   }
-  if (turn.kind !== 'assistant') return false;
+  if (turn.kind !== 'assistant' && turn.kind !== 'tool_result') return false;
   return (
     /\b(?:passed|success|successful|published|complete|completed)\b/i.test(text)
   );
@@ -246,6 +246,7 @@ function completionText(turn, text) {
     .replace(/\[tool_result\]\s*/g, '')
     .replace(/\[tool_use:[^\]]+\]\s*/g, '')
     .replace(/\[thinking\]\s*/g, '');
+  if (turn.kind === 'tool_result') return text;
   return text;
 }
 

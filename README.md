@@ -43,6 +43,12 @@ Try without installing globally:
 npx runwhy@latest
 ```
 
+RunWhy serves the React Web UI by default. Use the classic static UI only when you need the legacy view:
+
+```bash
+runwhy --ui classic
+```
+
 Try the packaged Web UI demo without local logs:
 
 ```bash

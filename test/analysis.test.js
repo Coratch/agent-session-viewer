@@ -30,20 +30,34 @@ test('buildEvidencePack redacts turn previews and computes duration metrics', ()
       },
       {
         id: 't2',
+        kind: 'reasoning',
+        timestamp: '2026-05-13T01:00:05.000Z',
+        title: 'reasoning',
+        text: 'checking command plan',
+      },
+      {
+        id: 't3',
         kind: 'tool_call',
         timestamp: '2026-05-13T01:00:10.000Z',
         title: 'functions.exec_command',
         text: 'npm test',
       },
       {
-        id: 't3',
+        id: 't4',
         kind: 'tool_result',
         timestamp: '2026-05-13T01:03:10.000Z',
         title: 'call_1',
         text: `failed with ${token}`,
       },
       {
-        id: 't4',
+        id: 't5',
+        kind: 'hook',
+        timestamp: '2026-05-13T01:03:10.000Z',
+        title: 'PostToolUse',
+        text: 'hook completed',
+      },
+      {
+        id: 't6',
         kind: 'assistant',
         timestamp: '2026-05-13T01:07:00.000Z',
         title: 'agent',
@@ -61,8 +75,10 @@ test('buildEvidencePack redacts turn previews and computes duration metrics', ()
   assert.equal(pack.trustedMetrics.largestGaps[0].durationMs, 230000);
   assert.deepEqual(pack.trustedMetrics.turnKindCounts, {
     user: 1,
+    reasoning: 1,
     tool_call: 1,
     tool_result: 1,
+    hook: 1,
     assistant: 1,
   });
   assert.match(pack.turns[0].textPreview, /~/);

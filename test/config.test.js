@@ -10,6 +10,7 @@ test('parseArgs returns defaults for local viewer startup', () => {
 
   assert.equal(cfg.host, '127.0.0.1');
   assert.equal(cfg.port, 4500);
+  assert.equal(cfg.ui, 'react');
   assert.deepEqual(cfg.providers, ['claude-code', 'codex']);
   assert.equal(cfg.claudeDir, path.join(os.homedir(), '.claude', 'projects'));
   assert.equal(cfg.codexDir, path.join(os.homedir(), '.codex', 'sessions'));
@@ -29,6 +30,18 @@ test('parseArgs accepts port, host, provider, and custom roots', () => {
   assert.deepEqual(cfg.providers, ['codex']);
   assert.equal(cfg.claudeDir, '/tmp/claude');
   assert.equal(cfg.codexDir, '/tmp/codex');
+});
+
+test('parseArgs accepts React UI migration flag', () => {
+  const cfg = parseArgs(['--ui', 'react']);
+
+  assert.equal(cfg.ui, 'react');
+});
+
+test('parseArgs accepts classic UI fallback flag', () => {
+  const cfg = parseArgs(['--ui', 'classic']);
+
+  assert.equal(cfg.ui, 'classic');
 });
 
 test('parseArgs demo mode points providers at packaged examples', () => {

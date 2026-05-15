@@ -1,6 +1,6 @@
 {
   "name": "runwhy",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "RunWhy: local flight recorder and time diagnosis for AI coding agents.",
   "license": "MIT",
   "private": false,
@@ -46,10 +46,13 @@
     "agent-session-viewer": "bin/agent-session-viewer.js"
   },
   "scripts": {
-    "check": "node --check bin/runwhy.js && node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check src/recap.js && node --check src/exporter.js && node --check src/redaction.js && node --check public/app.js && node scripts/scan-sensitive.js",
+    "check": "node --check bin/runwhy.js && node --check bin/agent-session-viewer.js && node --check src/cli.js && node --check src/server.js && node --check src/recap.js && node --check src/exporter.js && node --check src/redaction.js && node --check public/app.js && npm run web:check && node scripts/scan-sensitive.js",
     "pack:check": "npm pack --dry-run",
     "start": "node src/cli.js",
-    "test": "node --test"
+    "test": "node --test",
+    "web:build": "vite build --config web/vite.config.ts",
+    "web:check": "tsc -p web/tsconfig.json --noEmit",
+    "web:dev": "vite --config web/vite.config.ts"
   },
   "publishConfig": {
     "access": "public"
@@ -66,8 +69,18 @@
     "examples/fixtures/",
     "src/",
     "public/",
+    "web/dist/",
     "README.md",
     "LICENSE"
   ],
-  "dependencies": {}
+  "devDependencies": {
+    "@tanstack/react-virtual": "^3.13.24",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.3",
+    "vite": "^6.4.2"
+  }
 }

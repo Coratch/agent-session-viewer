@@ -120,39 +120,15 @@ function readTurns(entry) {
   const turns = [];
   for (const line of readJsonl(entry.file)) {
     if (line.type === 'user' && line.message && !line.isMeta) {
-      turns.push({
-        id: line.uuid || `${entry.id}:${turns.length}`,
-        provider: 'claude-code',
-        kind: 'user',
-        timestamp: line.timestamp,
-        title: 'user',
-        text: claudeMessageText(line.message),
-        raw: line,
-      });
+      turns.push(...claudeMessageTurns(entry, line, turns.length));
     } else if (line.type === 'assistant' && line.message) {
-      const usage = normalizeUsage(line.message.usage || {});
-      turns.push({
-        id: line.uuid || `${entry.id}:${turns.length}`,
-        provider: 'claude-code',
-        kind: 'assistant',
-        timestamp: line.timestamp,
-        title: line.message.model || 'assistant',
-        text: claudeMessageText(line.message),
-        raw: line,
-        usage,
-        costUSD: costFromUsage(line.message.model, line.message.usage || {}),
-        meta: {
-          model: line.message.model,
-          skill: line.attributionSkill,
-          plugin: line.attributionPlugin,
-        },
-      });
+      turns.push(...claudeMessageTurns(entry, line, turns.length));
     } else if (line.type === 'attachment' && line.attachment) {
       const attachment = line.attachment;
       turns.push({
         id: line.uuid || `${entry.id}:${turns.length}`,
         provider: 'claude-code',
-        kind: 'attachment',
+        kind: attachment.type === 'hook' ? 'hook' : 'attachment',
         timestamp: line.timestamp,
         title: attachment.hookName || attachment.toolName || attachment.type || 'attachment',
         text: String(attachment.content || attachment.stdout || '').slice(0, 4000),
@@ -172,6 +148,151 @@ function readTurns(entry) {
 function claudeMessageText(message) {
   if (!message) return '';
   return messageBlocksToText(message.content);
+}
+
+function claudeMessageTurns(entry, line, baseIndex) {
+  const message = line.message || {};
+  const role = message.role || line.type;
+  const blocks = normalizeClaudeBlocks(message.content);
+  const items = [];
+  let usageAssigned = false;
+
+  blocks.forEach((block, blockIndex) => {
+    const item = claudeBlockTurn(block, role, message, line, usageAssigned);
+    if (!item) return;
+    if (item.usage) usageAssigned = true;
+    items.push({ ...item, blockIndex });
+  });
+
+  if (!items.length) return [];
+
+  return items.map((item, index) => ({
+    id: turnId(entry, line, baseIndex + index, items.length === 1 ? null : item.blockIndex),
+    provider: 'claude-code',
+    timestamp: line.timestamp,
+    raw: line,
+    ...withoutBlockIndex(item),
+  }));
+}
+
+function claudeBlockTurn(block, role, message, line, usageAssigned) {
+  if (!block || typeof block !== 'object') return null;
+  if (block.type === 'text') {
+    const kind = role === 'assistant' ? 'assistant' : 'user';
+    return withAssistantUsage({
+      kind,
+      title: kind,
+      text: block.text || '',
+      meta: claudeAttributionMeta(line, message),
+    }, role, message, usageAssigned);
+  }
+
+  if (block.type === 'thinking') {
+    return {
+      kind: 'reasoning',
+      title: 'reasoning',
+      text: block.thinking || block.text || '',
+      meta: claudeAttributionMeta(line, message),
+    };
+  }
+
+  if (block.type === 'tool_use') {
+    const name = block.name || 'tool_call';
+    return {
+      kind: 'tool_call',
+      title: name,
+      text: [name, formatJson(block.input)].filter(Boolean).join(' '),
+      meta: {
+        ...claudeAttributionMeta(line, message),
+        toolName: block.name,
+        toolUseId: block.id,
+      },
+    };
+  }
+
+  if (block.type === 'tool_result') {
+    return {
+      kind: 'tool_result',
+      title: block.tool_use_id || block.name || 'tool_result',
+      text: claudeBlockContentText(block.content),
+      meta: {
+        ...claudeAttributionMeta(line, message),
+        toolUseId: block.tool_use_id,
+        isError: block.is_error,
+      },
+    };
+  }
+
+  if (block.type === 'image') {
+    return {
+      kind: 'attachment',
+      title: 'image',
+      text: '[image]',
+      meta: claudeAttributionMeta(line, message),
+    };
+  }
+
+  return {
+    kind: role === 'assistant' ? 'assistant' : 'user',
+    title: block.type || role,
+    text: claudeBlockContentText(block.content) || formatJson(block),
+    meta: claudeAttributionMeta(line, message),
+  };
+}
+
+function withAssistantUsage(item, role, message, usageAssigned) {
+  if (role !== 'assistant' || usageAssigned) return item;
+  const usage = normalizeUsage(message.usage || {});
+  return {
+    ...item,
+    usage,
+    costUSD: costFromUsage(message.model, message.usage || {}),
+  };
+}
+
+function claudeAttributionMeta(line, message) {
+  return {
+    model: message.model,
+    skill: line.attributionSkill,
+    plugin: line.attributionPlugin,
+  };
+}
+
+function normalizeClaudeBlocks(content) {
+  if (typeof content === 'string') return [{ type: 'text', text: content }];
+  if (!Array.isArray(content)) return [];
+  return content.map((block) => typeof block === 'string' ? { type: 'text', text: block } : block);
+}
+
+function claudeBlockContentText(content) {
+  if (content == null) return '';
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return content.map((part) => {
+    if (typeof part === 'string') return part;
+    if (!part || typeof part !== 'object') return '';
+    if (part.type === 'text') return part.text || '';
+    if (part.type === 'image') return '[image]';
+    return claudeBlockContentText(part.content) || formatJson(part);
+  }).filter(Boolean).join('\n\n');
+  if (typeof content.text === 'string') return content.text;
+  return formatJson(content);
+}
+
+function formatJson(value) {
+  if (value == null || value === '') return '';
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value, null, 2);
+}
+
+function turnId(entry, line, index, blockIndex) {
+  if (!line.uuid) return `${entry.id}:${index}`;
+  if (blockIndex == null) return line.uuid;
+  return `${line.uuid}:${blockIndex}`;
+}
+
+function withoutBlockIndex(item) {
+  const { blockIndex, ...rest } = item;
+  return rest;
 }
 
 function readJsonl(file) {

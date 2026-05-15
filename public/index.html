@@ -13,55 +13,86 @@
       <div class="brand-mark">RW</div>
       <div class="workspace-name">
         <h1>RunWhy</h1>
-        <p>Agent flight recorder</p>
+        <p data-i18n="app.subtitle">Agent flight recorder</p>
       </div>
     </div>
     <div class="topbar-controls">
-      <select id="provider-filter" aria-label="provider filter">
-        <option value="all">All providers</option>
-      </select>
-      <input id="filter" type="search" placeholder="Search sessions..." autocomplete="off">
-      <button id="refresh-sessions" type="button">Refresh Sources</button>
-      <label class="days-control">
-        <span>Days</span>
-        <input id="recap-days" type="number" min="1" max="365" value="7" aria-label="recap days">
-      </label>
-      <button id="recap-btn" class="nav-action report-action" type="button">Resume Work</button>
+      <div class="topbar-group topbar-query-group">
+        <input id="filter" type="search" placeholder="Search sessions..." data-i18n-placeholder="search.placeholder" autocomplete="off">
+      </div>
+      <div class="topbar-group topbar-recap-group">
+        <button id="recap-btn" class="nav-action report-action primary-action" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="recap-popover" data-i18n="action.resumeWork">Resume Work</button>
+        <div id="recap-popover" class="topbar-popover recap-popover" role="dialog" aria-label="Resume Work" data-i18n-aria-label="action.resumeWork" hidden>
+          <div class="popover-title" data-i18n="recap.rangeTitle">Work recap range</div>
+          <label class="days-control">
+            <span data-i18n="label.last">Last</span>
+            <input id="recap-days" type="number" min="1" max="365" value="7" aria-label="recap days" data-i18n-aria-label="label.recapDays">
+            <span data-i18n="label.daysUnit">days</span>
+          </label>
+          <button id="run-recap" class="report-action primary-action" type="button" data-i18n="action.resumeWork">Resume Work</button>
+        </div>
+      </div>
+      <div class="topbar-group topbar-tool-group">
+        <div class="settings-menu">
+          <button id="settings-button" class="icon-button settings-button" type="button" aria-label="Settings" title="Settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-popover" data-i18n-aria-label="settings.title" data-i18n-title="settings.title">
+            <span aria-hidden="true">⚙</span>
+          </button>
+          <div id="settings-popover" class="topbar-popover settings-popover" role="dialog" aria-label="Settings" data-i18n-aria-label="settings.title" hidden>
+            <div class="popover-title" data-i18n="settings.title">Settings</div>
+            <div class="settings-panel">
+              <label class="settings-field">
+                <span data-i18n="settings.provider">Provider</span>
+                <select id="provider-filter" aria-label="provider filter" data-i18n-aria-label="control.providerFilter">
+                  <option value="all" data-i18n="provider.all">All providers</option>
+                </select>
+              </label>
+              <label class="settings-field">
+                <span data-i18n="settings.language">Language</span>
+                <select id="language-switcher" class="language-switcher" aria-label="Language" data-i18n-aria-label="control.language">
+                  <option value="en">English</option>
+                  <option value="zh-CN">简体中文</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
   <aside class="sidebar">
     <header class="sidebar-head">
       <div class="sidebar-topbar">
-        <div class="sidebar-label">Sessions</div>
-        <button id="toggle-sidebar" class="layout-toggle sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Toggle sidebar">&lt;&lt;</button>
+        <div class="sidebar-label" data-i18n="nav.sessions">Sessions</div>
+        <button id="toggle-sidebar" class="layout-toggle sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true" title="Toggle sidebar" data-i18n-aria-label="layout.collapseSidebar" data-i18n-title="layout.toggleSidebar">&lt;&lt;</button>
       </div>
-      <nav class="side-nav" aria-label="primary">
+      <nav class="side-nav" aria-label="primary" data-i18n-aria-label="nav.primary">
         <button id="sessions-nav" class="nav-item active" type="button">
           <span class="nav-glyph">S</span>
-          <span>Sessions</span>
+          <span data-i18n="nav.sessions">Sessions</span>
           <span id="session-count" class="nav-meta">0</span>
         </button>
       </nav>
       <details class="side-section workspace-section">
-        <summary class="side-section-title">Sources</summary>
+        <summary class="side-section-title" data-i18n="nav.sources">Sources</summary>
         <div id="provider-roots" class="roots"></div>
       </details>
     </header>
     <section class="session-inbox">
       <div class="side-section-title list-title">
-        <span>Sessions</span>
-        <span>Local</span>
+        <span data-i18n="nav.sessions">Sessions</span>
+        <span data-i18n="nav.local">Local</span>
       </div>
+      <div id="session-range-status" class="session-range-status"></div>
       <div id="session-list" class="session-list"></div>
-      <button id="load-more-sessions" class="load-more" type="button" hidden>Load more</button>
+      <button id="load-more-sessions" class="load-more" type="button" hidden data-i18n="action.loadMore">Load more</button>
     </section>
   </aside>
   <main class="main">
     <div id="empty" class="empty">
       <section class="empty-state">
         <div class="empty-mark">RW</div>
-        <h2>No session selected</h2>
-        <p>Select a session or generate a work recap from the top bar.</p>
+        <h2 data-i18n="empty.title">No session selected</h2>
+        <p data-i18n="empty.copy">Select a session or generate a work recap from the top bar.</p>
       </section>
     </div>
     <div id="recap-view" class="workspace-view" hidden>
@@ -69,12 +100,12 @@
         <header class="session-head recap-head">
           <div class="session-head-row">
             <div class="session-title">
-              <div class="eyebrow">Recap</div>
-              <h2>Pick Up Where I Left Off</h2>
+              <div class="eyebrow" data-i18n="recap.eyebrow">Recap</div>
+              <h2 data-i18n="recap.title">Pick Up Where I Left Off</h2>
               <div id="recap-meta" class="session-meta"></div>
             </div>
             <div class="recap-actions">
-              <button id="copy-recap" type="button">Copy Markdown</button>
+              <button id="copy-recap" type="button" data-i18n="action.copyMarkdown">Copy Markdown</button>
             </div>
           </div>
         </header>
@@ -82,17 +113,17 @@
       </section>
       <aside class="detail-rail">
         <div class="detail-rail-head">
-          <h3>Details</h3>
+          <h3 data-i18n="rail.details">Details</h3>
         </div>
         <div class="rail-section">
-          <h3>Properties</h3>
+          <h3 data-i18n="rail.properties">Properties</h3>
           <dl>
-            <div><dt>Format</dt><dd>Markdown</dd></div>
-            <div><dt>Recommended</dt><dd>Strict redaction</dd></div>
-            <div><dt>Use</dt><dd>Issue, PR, new agent</dd></div>
+            <div><dt data-i18n="rail.format">Format</dt><dd data-i18n="rail.markdown">Markdown</dd></div>
+            <div><dt data-i18n="rail.recommended">Recommended</dt><dd data-i18n="rail.redaction">Strict redaction</dd></div>
+            <div><dt data-i18n="rail.use">Use</dt><dd data-i18n="rail.useTargets">Issue, PR, new agent</dd></div>
           </dl>
         </div>
-        <div class="rail-note">CLI export can produce a focused single-session handoff.</div>
+        <div class="rail-note" data-i18n="rail.cliExport">CLI export can produce a focused single-session handoff.</div>
       </aside>
     </div>
     <div id="session-view" class="workspace-view" hidden>
@@ -103,61 +134,57 @@
               <h2 id="session-title">-</h2>
               <div id="session-meta" class="session-meta"></div>
             </div>
-            <div class="refresh-controls" aria-label="refresh controls">
-              <button id="refresh-now" type="button">Reload Session</button>
-              <span id="last-refresh" class="last-refresh">Not refreshed yet</span>
-            </div>
           </div>
-          <div class="session-toolbar" aria-label="session view controls">
+          <div class="session-toolbar" aria-label="session view controls" data-i18n-aria-label="session.controls">
             <label class="turn-filter-control">
-              <span>Type</span>
-              <select id="turn-kind-filter" aria-label="turn type filter">
+              <span data-i18n="turn.type">Type</span>
+              <select id="turn-kind-filter" aria-label="turn type filter" data-i18n-aria-label="turn.typeFilter">
                 <option value="all">ALL</option>
                 <option value="user">USER</option>
                 <option value="assistant">Assistant</option>
+                <option value="reasoning">REASONING</option>
                 <option value="tool_call">TOOL_CALL</option>
                 <option value="tool_result">TOOL_RESULT</option>
+                <option value="hook">HOOK</option>
                 <option value="compacted">COMPACTED</option>
               </select>
             </label>
+            <div class="turn-range-controls">
+              <span id="turn-range-status" class="turn-range-status"></span>
+            </div>
+            <div class="turn-search-panel">
+              <label class="turn-search-control">
+                <span data-i18n="turn.search">Search</span>
+                <input id="turn-session-search" type="search" placeholder="Search turns..." autocomplete="off" data-i18n-placeholder="turn.searchPlaceholder">
+              </label>
+              <div id="turn-search-results" class="turn-search-results" aria-live="polite"></div>
+            </div>
           </div>
         </header>
         <div id="turns" class="turns"></div>
       </section>
       <aside class="detail-rail">
         <div class="detail-rail-head">
-          <h3>Inspector</h3>
+          <h3 data-i18n="rail.inspector">Inspector</h3>
         </div>
         <div class="rail-section">
-          <h3>Metrics</h3>
+          <h3 data-i18n="rail.metrics">Metrics</h3>
           <div id="session-totals" class="totals"></div>
         </div>
         <div class="rail-section">
-          <h3>Context</h3>
+          <h3 data-i18n="rail.context">Context</h3>
           <div id="session-context" class="context-tags"></div>
         </div>
-        <div class="rail-section sync-panel">
-          <h3>Refresh</h3>
-          <label class="refresh-toggle">
-            <input id="auto-refresh-toggle" type="checkbox" checked>
-            <span>Auto refresh</span>
-          </label>
-          <select id="refresh-interval" aria-label="refresh interval">
-            <option value="15000">15s</option>
-            <option value="30000" selected>30s</option>
-            <option value="60000">60s</option>
-          </select>
-        </div>
         <div class="rail-section analysis-panel">
-          <h3>Analysis</h3>
+          <h3 data-i18n="analysis.title">Analysis</h3>
           <div class="analysis-controls">
-            <select id="analysis-template" aria-label="analysis template"></select>
-            <select id="analysis-llm" aria-label="analysis llm"></select>
-            <textarea id="analysis-prompt" rows="3" placeholder="Focus..." aria-label="custom analysis focus"></textarea>
-            <button id="run-analysis" type="button">Analyze</button>
+            <select id="analysis-template" aria-label="analysis template" data-i18n-aria-label="analysis.template"></select>
+            <select id="analysis-llm" aria-label="analysis llm" data-i18n-aria-label="analysis.llm"></select>
+            <textarea id="analysis-prompt" rows="3" placeholder="Focus..." aria-label="custom analysis focus" data-i18n-placeholder="analysis.focusPlaceholder" data-i18n-aria-label="analysis.customFocus"></textarea>
+            <button id="run-analysis" type="button" data-i18n="action.analyze">Analyze</button>
             <div class="analysis-actions">
-              <button id="copy-analysis" type="button" disabled>Copy Markdown</button>
-              <button id="clear-analysis" type="button" disabled>Clear</button>
+              <button id="copy-analysis" type="button" disabled data-i18n="action.copyMarkdown">Copy Markdown</button>
+              <button id="clear-analysis" type="button" disabled data-i18n="action.clear">Clear</button>
             </div>
           </div>
           <div id="analysis-progress" class="analysis-progress" aria-live="polite"></div>
@@ -167,7 +194,7 @@
       </aside>
     </div>
   </main>
-  <button id="toggle-detail-rail" class="layout-toggle detail-rail-toggle" type="button" aria-label="Collapse details" aria-expanded="true" title="Toggle details">&gt;&gt;</button>
+  <button id="toggle-detail-rail" class="layout-toggle detail-rail-toggle" type="button" aria-label="Collapse details" aria-expanded="true" title="Toggle details" data-i18n-aria-label="layout.collapseDetails" data-i18n-title="layout.toggleDetails">&gt;&gt;</button>
 </div>
 <script src="/app.js"></script>
 </body>

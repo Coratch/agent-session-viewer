@@ -48,7 +48,7 @@ function renderSessionMarkdown(sessionExport, options = {}) {
   }
 
   turns.forEach((turn, index) => {
-    lines.push(`### ${index + 1}. ${redactText(turn.kind || 'turn', { level })}: ${redactText(compact(turn.title || ''), { level })}`);
+    lines.push(`### ${index + 1}. ${redactText(turnKindLabel(turn.kind), { level })}: ${redactText(compact(turn.title || ''), { level })}`);
     if (turn.timestamp) lines.push(metadataLine('Timestamp', turn.timestamp, level));
     lines.push('');
     lines.push(fenced(redactText(turn.text || '', { level })));
@@ -56,6 +56,21 @@ function renderSessionMarkdown(sessionExport, options = {}) {
   });
 
   return lines.join('\n');
+}
+
+function turnKindLabel(kind) {
+  const labels = {
+    user: 'User',
+    assistant: 'Assistant',
+    reasoning: 'Reasoning',
+    tool_call: 'Tool Call',
+    tool_result: 'Tool Result',
+    hook: 'Hook',
+    compacted: 'Compacted',
+    attachment: 'Attachment',
+    event: 'Event',
+  };
+  return labels[kind] || 'Turn';
 }
 
 function writeSessionExport(config) {

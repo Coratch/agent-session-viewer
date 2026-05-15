@@ -50,6 +50,7 @@ function helpText() {
     '  --provider <list>              Comma-separated providers: claude-code,codex',
     '  --claude-dir <path>            Claude Code projects root',
     '  --codex-dir <path>             Codex sessions root',
+    '  --ui <react|classic>            Web UI shell to serve (default: react)',
     '  --demo                         Use packaged example sessions',
     '  --help, -h                     Show this help',
     '',
